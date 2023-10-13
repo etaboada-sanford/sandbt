@@ -1,0 +1,3 @@
+[submodule "dbt_sub_projects/sandbt_common"]
+	path = dbt_sub_projects/sandbt_common
+	url = https://sanfordltd@dev.azure.com/sanfordltd/Data%20and%20Analytics/_git/sandbt_common
