@@ -1,0 +1,3 @@
+packages:
+  - local: dbt_subprojects/sandbt_common
+  - local: dbt_subprojects/sandbt_d365
