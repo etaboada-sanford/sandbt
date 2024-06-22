@@ -1,7 +1,7 @@
 {% macro is_primitive(val) %}
   {% do return (
     val is none or
-    val is boolean or
+    val is bit or
     val is number or
     val is string
   ) %}
@@ -12,7 +12,7 @@
 {%- endmacro -%}
 
 {% macro default__edr_type_bool() %}
-    {% do return("boolean") %}
+    {% do return("bit") %}
 {% endmacro %}
 
 {% macro bigquery__edr_type_bool() %}

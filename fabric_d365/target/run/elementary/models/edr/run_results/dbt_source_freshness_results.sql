@@ -1,16 +1,94 @@
 
-        
-            delete from "dw_gold"."dbo"."dbt_source_freshness_results"
-            where (
-                source_freshness_execution_id) in (
-                select (source_freshness_execution_id)
-                from "dw_gold"."dbo"."dbt_source_freshness_results__dbt_tmp"
-            );
-        
+  
+    USE [dw_gold];
+    
     
 
-    insert into "dw_gold"."dbo"."dbt_source_freshness_results" ("source_freshness_execution_id", "unique_id", "max_loaded_at", "snapshotted_at", "generated_at", "created_at", "max_loaded_at_time_ago_in_s", "status", "error", "compile_started_at", "compile_completed_at", "execute_started_at", "execute_completed_at", "invocation_id", "warn_after", "error_after", "filter")
-    (
-        select "source_freshness_execution_id", "unique_id", "max_loaded_at", "snapshotted_at", "generated_at", "created_at", "max_loaded_at_time_ago_in_s", "status", "error", "compile_started_at", "compile_completed_at", "execute_started_at", "execute_completed_at", "invocation_id", "warn_after", "error_after", "filter"
-        from "dw_gold"."dbo"."dbt_source_freshness_results__dbt_tmp"
-    )
+    EXEC('create view "dbo"."dbt_source_freshness_results__dbt_tmp_vw" as 
+
+
+    with empty_table as (
+            select
+            
+                
+        cast(''dummy_string'' as varchar(4096)) as source_freshness_execution_id
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as unique_id
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as max_loaded_at
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as snapshotted_at
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as generated_at
+
+,
+                cast(''2091-02-17'' as DATETIME2(6)) as created_at
+
+,
+                
+        cast(123456789.99 as FLOAT) as max_loaded_at_time_ago_in_s
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as status
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as error
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as compile_started_at
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as compile_completed_at
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as execute_started_at
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as execute_completed_at
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as invocation_id
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as warn_after
+
+,
+                
+        cast(''dummy_string'' as varchar(4096)) as error_after
+
+,
+                
+        cast(''this_is_just_a_long_dummy_string'' as varchar(4096)) as filter
+
+
+            )
+        select * from empty_table
+        where 1 = 0
+;');
+
+
+
+
+    
+    
+        EXEC('CREATE TABLE [dw_gold].[dbo].[dbt_source_freshness_results] AS (SELECT * FROM [dw_gold].[dbo].[dbt_source_freshness_results__dbt_tmp_vw]);');
+    
+    
+
+  

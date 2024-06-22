@@ -192,7 +192,7 @@
       ('command', 'string'),
       ('dbt_version', 'string'),
       ('elementary_version', 'string'),
-      ('full_refresh', 'boolean'),
+      ('full_refresh', 'bit'),
       ('invocation_vars', 'long_string'),
       ('vars', 'long_string'),
       ('target_name', 'string'),

@@ -19,7 +19,7 @@
 {% endmacro %}
 
 {% macro standard_deviation(column_name) -%}
-    stddev(cast({{ column_name }} as {{ elementary.edr_type_float() }}))
+    stdev(cast({{ column_name }} as {{ elementary.edr_type_float() }}))
 {%- endmacro %}
 
 {% macro variance(column_name) -%}

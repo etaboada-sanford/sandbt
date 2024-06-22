@@ -100,7 +100,7 @@
 
 
 {% macro empty_schema_columns_snapshot() %}
-    {{ elementary.empty_table([('column_state_id','string'),('full_column_name','string'),('full_table_name','string'),('column_name','string'),('data_type','string'),('is_new','boolean'),('detected_at','timestamp'),('created_at','timestamp')]) }}
+    {{ elementary.empty_table([('column_state_id','string'),('full_column_name','string'),('full_table_name','string'),('column_name','string'),('data_type','string'),('is_new','bit'),('detected_at','timestamp'),('created_at','timestamp')]) }}
 {% endmacro %}
 
 
@@ -136,8 +136,8 @@
 
     {%- set dummy_values = elementary.dummy_values() %}
 
-    {%- if data_type == 'boolean' %}
-        cast ({{ dummy_values['boolean'] }} as {{ elementary.edr_type_bool()}}) as {{ column_name }}
+    {%- if data_type == 'bit' %}
+        cast ({{ dummy_values['bit'] }} as {{ elementary.edr_type_bool()}}) as {{ column_name }}
     {%- elif data_type == 'timestamp' -%}
         cast('{{ dummy_values['timestamp'] }}' as {{ elementary.edr_type_timestamp() }}) as {{ column_name }}
     {%- elif data_type == 'int' %}
@@ -160,7 +160,7 @@
     {%- set dummy_values = {
      'string': "dummy_string",
      'long_string': "this_is_just_a_long_dummy_string",
-     'boolean': 'True',
+     'bit': 1,
      'int': 123456789,
      'bigint': 31474836478,
      'float': 123456789.99,

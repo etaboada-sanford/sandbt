@@ -63,7 +63,7 @@ with empty_table as (
 
 ,
                 
-        cast (True as boolean) as full_refresh
+        cast (1 as bit) as full_refresh
 
 ,
                 

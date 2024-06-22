@@ -35,7 +35,7 @@ models:
         description: Version of the elementary package that was used in this invocation.
 
       - name: full_refresh
-        data_type: boolean
+        data_type: bit
         description: Whether or not this invocation was executed as a full-refresh.
 
       - name: invocation_vars
@@ -200,7 +200,7 @@ models:
         description: ""
 
       - name: full_refresh
-        data_type: boolean
+        data_type: bit
         description: Was this a full refresh execution.
 
       - name: compiled_code

@@ -25,7 +25,7 @@
 
 ,
                 
-        cast (True as boolean) as is_new
+        cast (1 as bit) as is_new
 
 ,
                 cast('2091-02-17' as DATETIME2(6)) as detected_at

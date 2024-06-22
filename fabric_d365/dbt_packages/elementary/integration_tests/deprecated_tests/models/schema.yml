@@ -367,7 +367,7 @@ models:
       - name: player
         data_type: "{{ 'STRING' if (target.type == 'bigquery' or target.type == 'databricks') else 'character varying' if target.type == 'redshift' else 'TEXT' }}"
       - name: goals
-        data_type: BOOLEAN
+        data_type: bit
       - name: coffee_cups_consumed
         data_type: INTEGER
     tests:

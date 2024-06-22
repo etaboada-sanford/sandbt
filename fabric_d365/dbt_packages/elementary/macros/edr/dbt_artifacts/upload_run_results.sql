@@ -25,7 +25,7 @@
                                                                        ('compile_started_at', 'string'),
                                                                        ('compile_completed_at', 'string'),
                                                                        ('rows_affected', 'bigint'),
-                                                                       ('full_refresh', 'boolean'),
+                                                                       ('full_refresh', 'bit'),
                                                                        ('compiled_code', 'long_string'),
                                                                        ('failures', 'bigint'),
                                                                        ('query_id', 'string'),
