@@ -1,5 +1,6 @@
 dbt-core
 dbt-fabric
+graphframes
 elementary-data
 sqlfluff ~= 2.3.5
 sqlfluff-templater-dbt ~= 2.3.5
