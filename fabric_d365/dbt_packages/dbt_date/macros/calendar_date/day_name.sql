@@ -48,8 +48,3 @@
 {%- set f = 'E' if short else 'EEEE' -%}
     date_format({{ date }}, '{{ f }}')
 {%- endmacro %}
-
-{%- macro trino__day_name(date, short) -%}
-{%- set f = 'a' if short else 'W' -%}
-    date_format({{ date }}, '%{{ f }}')
-{%- endmacro %}

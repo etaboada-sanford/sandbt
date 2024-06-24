@@ -3,7 +3,8 @@ export STARTED_DEVSETUP="STARTED   $(date)"
 unset DBT_PROJECT
 unset SCRIPTS
 unset ENV
-export python_exe="py"
+python_exe=${1:-"py"}
+echo "Pythone executable: " $python_exe
 
 if [ ! -f .venv/Scripts/activate ]; then
   echo "*** Creating virtual environment."

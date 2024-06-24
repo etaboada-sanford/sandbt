@@ -30,9 +30,7 @@ select
     {{ dbt_date.last_month_name(short=True) }} as last_month_name_short,
     {{ dbt_date.next_month_number() }} as next_month_number,
     {{ dbt_date.next_month_name(short=False) }} as next_month_name,
-    {{ dbt_date.next_month_name(short=True) }} as next_month_name_short,
-    cast('{{ modules.datetime.date(1997, 9, 29) }}' as date) as datetime_date,
-    cast('{{ modules.datetime.datetime(1997, 9, 29, 6, 14, 0, tzinfo=modules.pytz.timezone(var("dbt_date:time_zone"))) }}' as {{ dbt.type_timestamp() }}) as datetime_datetime
+    {{ dbt_date.next_month_name(short=True) }} as next_month_name_short
 
 union all
 
@@ -66,9 +64,7 @@ select
     {{ dbt_date.last_month_name(short=True) }} as last_month_name_short,
     {{ dbt_date.next_month_number() }} as next_month_number,
     {{ dbt_date.next_month_name(short=False) }} as next_month_name,
-    {{ dbt_date.next_month_name(short=True) }} as next_month_name_short,
-    cast('{{ modules.datetime.date(1997, 9, 29) }}' as date) as datetime_date,
-    cast('{{ modules.datetime.datetime(1997, 9, 29, 6, 14, 0, tzinfo=modules.pytz.timezone(var("dbt_date:time_zone"))) }}' as {{ dbt.type_timestamp() }}) as datetime_datetime
+    {{ dbt_date.next_month_name(short=True) }} as next_month_name_short
 
 {%- endmacro %}
 
@@ -93,12 +89,6 @@ select
     {{ return([48,49]) }}
 {%- endmacro %}
 
-{% macro trino__get_test_week_of_year() -%}
-    {# weeks_of_year for '2020-11-29' and '2020-12-01', respectively #}
-    {# trino uses ISO year #}
-    {{ return([48,49]) }}
-{%- endmacro %}
-
 
 {% macro get_test_week_start_date() -%}
     {{ return(adapter.dispatch('get_test_week_start_date', 'dbt_date_integration_tests') ()) }}
@@ -113,11 +103,6 @@ select
     {{ return(['2020-11-23', '2020-11-30']) }}
 {%- endmacro %}
 
-{% macro trino__get_test_week_start_date() -%}
-    {# trino does not support non-iso weeks #}
-    {{ return(['2020-11-23', '2020-11-30']) }}
-{%- endmacro %}
-
 
 {% macro get_test_week_end_date() -%}
     {{ return(adapter.dispatch('get_test_week_end_date', 'dbt_date_integration_tests') ()) }}
@@ -129,11 +114,6 @@ select
 
 {% macro spark__get_test_week_end_date() -%}
     {# spark does not support non-iso weeks #}
-    {{ return(['2020-11-29', '2020-12-06']) }}
-{%- endmacro %}
-
-{% macro trino__get_test_week_end_date() -%}
-    {# trino does not support non-iso weeks #}
     {{ return(['2020-11-29', '2020-12-06']) }}
 {%- endmacro %}
 

@@ -9,7 +9,3 @@
 {% macro bigquery__date_part(datepart, date) -%}
     extract({{ datepart }} from {{ date }})
 {%- endmacro %}
-
-{% macro trino__date_part(datepart, date) -%}
-    extract({{ datepart }} from {{ date }})
-{%- endmacro %}

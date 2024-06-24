@@ -33,11 +33,6 @@
 {%- endmacro %}
 
 {%- macro spark__month_name(date, short) -%}
-{%- set f = 'MMM' if short else 'MMMM' -%}
+{%- set f = 'LLL' if short else 'LLLL' -%}
     date_format({{ date }}, '{{ f }}')
-{%- endmacro %}
-
-{%- macro trino__month_name(date, short) -%}
-{%- set f = 'b' if short else 'M' -%}
-    date_format({{ date }}, '%{{ f }}')
 {%- endmacro %}

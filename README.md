@@ -12,23 +12,24 @@ To begin working with this project, please ensure that the following tools are a
 2. [Git Bash](https://git-scm.com/download/win) - if working on Windows machine, this is to run shell scripts 
 3. [Python3](https://www.python.org/downloads/release/python-3120/)
 4. [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+5. [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
 
 
 1. In your VS Code workspace, clone the following repository:
 ```bash
-git clone https://sanfordltd@dev.azure.com/sanfordltd/Data%20and%20Analytics/_git/sandbtfabric-d365
+git clone https://sanfordltd@dev.azure.com/sanfordltd/Data%20and%20Analytics/_git/sandbt
 ```
 
 2. In your VS Code terminal, launch Git Bash and make sure you are in the project directory. If not, then change to the project directory directory. You should see a (main) prompt indicating that you are in the main branch of the sandbtfabric-d365 project:
 ```bash
-$ cd /c/code/sandbtfabric-d365
-MINGW64 /c/code/sandbtfabric-d365 (main)
+$ cd /c/code/sandbt
+MINGW64 /c/code/sandbt (main)
 ```
 
 3. Setup your development environment variables by executing the following script:
 ```bash
-MINGW64 /c/code/sandbtfabric-d365 (main)
-$ ./developer_setup.sh
+MINGW64 /c/code/sandbt (main)
+$ ./developer_setup.sh [optional: supply the python executable command e.g. py or python (default is py)]
 ```
 This script will create your python virtual environment in the .venv folder. A virtual python environment ensures that you have an isolated and controlled environment separate from your local python installation. This controls that you only develop on managed python packages and versions that are expected to be deployed in test/production environment. You need to be working in this virtual environment everytime you do coding. These packages are configured in the requirements.txt file.
 
@@ -39,20 +40,32 @@ $ source .venv/Scripts/activate
 
 ## Getting started
 
-The following are the steps to get started working with this project. If you want to build the whole dbt project from scratch, please run the folloing script:
+The following are the steps to get started working with this project. If you want to build the whole D365 dbt fabric project from scratch, inside the fabric_d365 folder, please run the following script:
 
 ```bash
-dbt deps
-./scripts/init.sh
+(.venv)
+MINGW64 /c/code/sandbt/fabric_d365 (main)
+$ dbt deps
+```
+
+For you to be able to connect to the Fabric lakehouse for development, please login with your credentials using the command:
+
+```bash
+(.venv)
+MINGW64 /c/code/sandbt/fabric_d365 (main)
+$ az login
+```
+
+Once authenticated, you can now start to initialize the project by running the command:
+
+```bash
+(.venv)
+MINGW64 /c/code/sandbt/fabric_d365 (main)
+$ ./scripts/init.sh
 ```
 
 The script will do the following:
 
-1. Setup elementary-data tables and views (for monitoring and lineage tracing)
-2. Prepare the ancillary tables (_cdmmetadata views and d365_lsn_watermark table)
-3. Generate the D365 ChangeFeed source YAML's and create external tables in the LOAD schema (generated file is in ~/models/load/sources.yml)
-4. Generate the D365 Table source YAML's and create external tables in the ODS schema (generated file is in ~/models/ods/sources.yml)
-5. Generate the D365 base model SQL files for STAGE schema (generated SQL files are in ~/models/stage/src_export_to_datalake/base_d365_{Table Name}.sql)
-6. Load the seed files (located in ~/seeds)
-7. Perform initial bulk loading of base tables querying the external tables from the ODS schema
-8. Perform first incremental loading of base tables querying the external tables from the LOAD schema
+1. Read the d365_tables.yml file which contains all the D365 tables required for reporting
+2. Connect to the Dataverse lakehouse to query the columns of the table as provided in the the d365_tables.yml
+3. Build the dbt sources.yml file and store it in ./models/dw
