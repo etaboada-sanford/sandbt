@@ -1,0 +1,34 @@
+version: 2
+sources:
+- name: dbo
+  database: dataverse_sanfordsit_cds2_workspace_unqf87dd056b3bf4075bf970702376af
+  description: D365 FNO shortcuts from Dataverse
+  tables:
+  - name: stg_dim_d365_company
+    columns:
+    - name: company_recid
+      data_type: bigint
+    - name: party_recId
+      data_type: bigint
+    - name: parentorganization
+      data_type: bigint
+    - name: company_dataarea
+      data_type: varchar
+    - name: parent_co_dataarea
+      data_type: varchar
+    - name: company
+      data_type: varchar
+    - name: company_name
+      data_type: varchar
+    - name: parent_company_name
+      data_type: varchar
+    - name: coregnum
+      data_type: varchar
+    - name: bank
+      data_type: varchar
+    - name: hierarchytypename
+      data_type: varchar
+    - name: company_path
+      data_type: varchar
+    - name: company_path_level
+      data_type: integer

@@ -57,7 +57,7 @@ template_data = OrderedDict([
         OrderedDict([
             ("name", "dataverse"),
             ("database", data['source_lakehouse']),
-            ("description", "D365 external table sources for ods"),
+            ("description", "D365 FNO shortcuts from Dataverse"),
             ("tables", [])
         ])
     ])

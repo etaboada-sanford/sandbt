@@ -33,7 +33,11 @@ vars:
 # files using the `{{ config(...) }}` macro.
 models:
   fabric_d365:
-    dw:
+    01_lh_bronze:
+      +database: dataverse_sanfordsit_cds2_workspace_unqf87dd056b3bf4075bf970702376af
+    02_lh_silver:
+      +database: lh_silver
+    03_dw_gold:
       +schema: dw
       dimensions:
         +materialized: view

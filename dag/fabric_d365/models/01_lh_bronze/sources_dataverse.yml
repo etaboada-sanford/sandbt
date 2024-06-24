@@ -2,7 +2,7 @@ version: 2
 sources:
 - name: dbo
   database: dataverse_sanfordsit_cds2_workspace_unqf87dd056b3bf4075bf970702376af
-  description: D365 external table sources for ods
+  description: D365 FNO shortcuts from Dataverse
   tables:
   - name: accountingdistribution
     columns:
@@ -83,7 +83,7 @@ sources:
     - name: createdon
       data_type: datetime2
     - name: modifiedon
-      data_type: datetime2
+      data_type: datetime2 
     - name: IsDelete
       data_type: bit
     - name: PartitionId
