@@ -32,11 +32,12 @@ def execute_query(connection, query):
 data = read_yaml_file('d365_tables.yml')
 
 print("Source Lakehouse: ", data['source_lakehouse'])
+print("Target yml file: ", data['target_yml'])
 print("Tables: ", data['tables'])
 
 # Establish a connection to the Microsoft Fabric Lakehouse
 credential = AzureCliCredential()
-sql_endpoint = "b27nglr6dgderlhlbqidfj2kge-uf6n4xvquwoejm7ep7blowjgei.datawarehouse.fabric.microsoft.com"
+sql_endpoint = "b27nglr6dgderlhlbqidfj2kge-pwo43isi2ezetbspsg37pqmaqa.datawarehouse.fabric.microsoft.com"
 database = data['source_lakehouse']
 connection_string = f"Driver={{ODBC Driver 18 for SQL Server}};Server={sql_endpoint},1433;Database=f{database};Encrypt=Yes;TrustServerCertificate=No"
 
@@ -55,7 +56,8 @@ template_data = OrderedDict([
     ("version", 2),
     ("sources", [
         OrderedDict([
-            ("name", "dataverse"),
+            ("name", "fno"),
+            ("schema", "dbo"),
             ("database", data['source_lakehouse']),
             ("description", "D365 FNO shortcuts from Dataverse"),
             ("tables", [])
@@ -66,6 +68,7 @@ template_data = OrderedDict([
 for table in data['tables']:
     query = f"SELECT COLUMN_NAME, DATA_TYPE FROM {data['source_lakehouse']}.[INFORMATION_SCHEMA].[COLUMNS] WHERE TABLE_NAME = '{table}'"
     result = execute_query(connection, query)
+    print(f"Processing: [{table}] ")
     print(result)
 
     # Initialize the table data structure
@@ -79,7 +82,7 @@ for table in data['tables']:
     template_data["sources"][0]["tables"].append(table_data)
 
 # Write the template data to the sources.yml file
-write_yaml_file('source_dataverse.yml', template_data)
+write_yaml_file(data['target_yml']), template_data)
 
 # Print a success message
 print("The template data was successfully written to the source_dataverse.yml file.")
