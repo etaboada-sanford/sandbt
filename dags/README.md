@@ -20,7 +20,30 @@ To begin working with this project, please ensure that the following tools are a
 git clone https://sanfordltd@dev.azure.com/sanfordltd/Data%20and%20Analytics/_git/sandbt
 ```
 
-2. In your VS Code terminal, launch Git Bash and make sure you are in the project directory. If not, then change to the project directory directory. You should see a (main) prompt indicating that you are in the main branch of the sandbtfabric-d365 project:
+The folders are arranges as:
+```
+  [sandbt] (root folder)
+      \_ [.vscode] (folder containing the Visual Studio Code recommended settings and extensions)
+      \_ [dags] (Apache Airflow DAG folder)
+         \_ [fabric_d365] (dbt project for D365 FNO)
+            \_ [analyses] (dbt analyses folder)
+            \_ [macros] (dbt macros folder)
+            \_ [models] (dbt models folder)
+            \_ [scripts] (project supporting scripts)
+            \_ [seeds] (dbt seeds folder)
+            \_ [snapshots] (dbt snapshots folder)
+            \_ [tests] (dbt tests folder)
+            \_ d365_tables.yml (configuration files containing the list of D365 FNO tables for reporting)
+            \_ dbt_project.yml (dbt project file)
+            \_ packages.yml (sandbt project package dependencies)
+         \_ developer_setup.sh (dbt project for D365 FNO)
+         \_ requirements.txt (pip install requirements file)
+      \_ [plugins] (Apache Airflow plugins folder)
+      \_ developer_setup.sh (Shell script to setup developer project environment)
+
+```
+
+2. Launch Git Bash in administrator mode and make sure you are in the project directory. If not, then change to the project directory directory. You should see a (main) prompt indicating that you are in the main branch of the sandbt project:
 ```bash
 $ cd /c/code/sandbt
 MINGW64 /c/code/sandbt (main)
@@ -29,9 +52,9 @@ MINGW64 /c/code/sandbt (main)
 3. Setup your development environment variables by executing the following script:
 ```bash
 MINGW64 /c/code/sandbt (main)
-$ ./developer_setup.sh [optional: supply the python executable command e.g. py or python (default is py)]
+$ ./developer_setup.sh [optional: supply the python executable command e.g. py or python (default is python)]
 ```
-This script will create your python virtual environment in the .venv folder. A virtual python environment ensures that you have an isolated and controlled environment separate from your local python installation. This controls that you only develop on managed python packages and versions that are expected to be deployed in test/production environment. You need to be working in this virtual environment everytime you do coding. These packages are configured in the requirements.txt file.
+This script will create your python virtual environment in the .venv folder. A virtual python environment ensures that you have an isolated and controlled environment separate from your local python installation. This controls that you only develop on managed python packages and versions that are expected to be deployed in test/production environment. You need to be working in this virtual environment everytime you do coding. These packages are configured in the dags/requirements.txt file.
 
 4. Activate the virtual environment. When activated, the shell will have a (.venv) prompt displayed
 ```bash
@@ -44,7 +67,7 @@ The following are the steps to get started working with this project. If you wan
 
 ```bash
 (.venv)
-MINGW64 /c/code/sandbt/fabric_d365 (main)
+MINGW64 /c/code/sandbt/dags/fabric_d365 (main)
 $ dbt deps
 ```
 
@@ -61,11 +84,11 @@ Once authenticated, you can now start to initialize the project by running the c
 ```bash
 (.venv)
 MINGW64 /c/code/sandbt/fabric_d365 (main)
-$ ./scripts/init.sh
+$ python ./scripts/init.py
 ```
 
 The script will do the following:
 
 1. Read the d365_tables.yml file which contains all the D365 tables required for reporting
 2. Connect to the Dataverse lakehouse to query the columns of the table as provided in the the d365_tables.yml
-3. Build the dbt sources.yml file and store it in ./models/dw
+3. Build the dbt sources.yml file and store it in ./models/01_lh_bronze/source_fno.yml

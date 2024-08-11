@@ -1,0 +1,5 @@
+.venv/
+./dags/fabric_d365/dbt_packages/
+./dags/fabric_d365/scripts/
+./dags/fabric_d365/target/
+./dags/fabric_d365/tests/

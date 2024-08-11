@@ -7,6 +7,9 @@ version: 1.0.0
 # This setting configures which "profile" dbt uses for this project.
 profile: fabric_d365
 
+vars:
+  'dbt_date:time_zone': 'Pacific/Auckland'
+
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
 # found in the "models/" directory. You probably won"t need to change these!
@@ -19,7 +22,6 @@ snapshot-paths: [snapshots]
 
 clean-targets:         # directories to be removed by `dbt clean`
   - target
-  - dbt_packages
 
 vars:
     dbt_date:time_zone: Pacific/Auckland
@@ -32,19 +34,27 @@ vars:
 # files using the `{{ config(...) }}` macro.
 models:
   d365:
-    01_lh_bronze:
-      +database: dataverse_sanfordsit_cds2_workspace_unqf87dd056b3bf4075bf970702376af
-    02_lh_silver:
-      +database: lh_silver
-    03_dw_gold:
-      +database: sanford_dw_{{ target.name }}
-      +schema: dw
+    01_bronze:
+    02_silver:
+      +database: sanford_dw
+      +schema: stage
+      +materialized: table
+    03_gold:
+      +database: sanford_dw
       dimensions:
-        +materialized: view
+        +schema: dw
+        +materialized: table
+      facts:
+        +schema: dw
+        +materialized: table
 
 seeds:
   d365:
-    03_dw_gold:
-      +database: sanford_dw_{{ target.name }}
-      +schema: dw
+    03_gold:
+      +database: sanford_dw
       dimensions:
+        +schema: dw
+      facts:
+        +schema: dw
+      intermediaries:
+        +schema: int

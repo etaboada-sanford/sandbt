@@ -42,7 +42,7 @@
     "workbench.preferredDarkColorTheme": "Tomorrow Night Blue",
     "workbench.preferredHighContrastColorTheme": "Tomorrow Night Blue",
     "dbt.enableNewLineagePanel": true,
-    "dbt.profilesDirOverride": "~/.dbt",
+    "dbt.profilesDirOverride": "${userHome}/.dbt",
     "dbt-formatter.camelCase": false,
     "dbt-formatter.dialect": "sql-jinja",
     "sql.linter.executablePath": "${workspaceFolder}/.venv/Scripts/sqlfluff",
@@ -70,13 +70,16 @@
     ],
     "sqlfluff.env.useDotEnvFile": true,
     "sqlfluff.excludeRules": [
-        "L009"
+        "L009",
+        "AM06: ambiguous.column_references",
+        "RF06: references.quoting",
+        "CP02: capitalisation.identifiers"
     ],
     "sqlfluff.ignoreLocalConfig": false,
     "sqlfluff.ignoreParsing": false,
     "sqlfluff.rules": [],
     "sqlfluff.suppressNotifications": false,
-    "sqlfluff.workingDirectory": "",
+    "sqlfluff.workingDirectory": "${workspaceFolder}/dags/fabric_d365/models",
     "editor.formatOnSave": false,
     /* Linter */
     "sqlfluff.linter.arguments": [],
@@ -96,5 +99,8 @@
     "sqlfluff.shell": false,
     "dbt.queryScale": "1.16",
     "dbt.enableNewQueryPanel": true,
-    "terminal.integrated.tabs.defaultColor": "terminal.ansiGreen"
+    "terminal.integrated.tabs.defaultColor": "terminal.ansiGreen",
+    "dbt.dbtIntegration": "core",
+    "dbt.dbtPythonPath": "${workspaceFolder}/.venv/Scripts",
+    "dbt.perspectiveTheme": "Vintage"
 }
