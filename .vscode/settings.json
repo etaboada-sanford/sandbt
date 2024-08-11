@@ -1,0 +1,106 @@
+{
+    "python.pythonPath": "./.venv/Scripts/python",
+    "files.associations": {
+        "*.sql": "jinja-sql",
+        "**/target/**": ""
+    },
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/dbt-labs/dbt-jsonschema/main/schemas/1.6/dbt_yml_files-1.6.json": [
+            "/**/*.yml",
+            "!profiles.yml",
+            "!dbt_project.yml",
+            "!packages.yml",
+            "!selectors.yml",
+            "!profile_template.yml",
+            "!dependencies.yml",
+            "!d365_tables.yml"
+        ],
+        "https://raw.githubusercontent.com/dbt-labs/dbt-jsonschema/main/schemas/1.6/dbt_project-1.6.json": [
+            "dbt_project.yml"
+        ],
+        "https://raw.githubusercontent.com/dbt-labs/dbt-jsonschema/main/schemas/1.6/selectors-1.6.json": [
+            "selectors.yml"
+        ],
+        "https://raw.githubusercontent.com/dbt-labs/dbt-jsonschema/main/schemas/1.6/packages-1.6.json": [
+            "packages.yml"
+        ]
+    },
+    "findrelated.applyRulesets": [
+        "sql",
+        "yml",
+    ],
+    "[jinja-sql]": {
+        "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
+    },
+    "workbench.editor.enablePreview": false,
+    "workbench.editor.highlightModifiedTabs": true,
+    "workbench.editor.labelFormat": "medium",
+    "workbench.colorTheme": "Tomorrow Night Blue",
+    "workbench.preferredDarkColorTheme": "Tomorrow Night Blue",
+    "workbench.preferredHighContrastColorTheme": "Tomorrow Night Blue",
+    "dbt.enableNewLineagePanel": true,
+    "dbt.profilesDirOverride": "${userHome}/.dbt",
+    "dbt-formatter.camelCase": false,
+    "dbt-formatter.dialect": "sql-jinja",
+    "sql.linter.executablePath": "${workspaceFolder}/.venv/Scripts/sqlfluff",
+    "sql.linter.run": "onSave",
+    "sqlfluff.dialect": "tsql",
+    /* DBT setup requires these settings to lint and format the document. */
+    "sqlfluff.executablePath": "${workspaceFolder}/.venv/Scripts/sqlfluff.exe",
+    "sqlfluff.linter.run": "onSave",
+    "sqlfluff.experimental.format.executeInTerminal": false,
+    "sqlfluff.dbtInterface.enabled": false,
+    "sqlfluff.format.languages": [
+        "sql",
+        "jinja-sql",
+        "tsql"
+    ],
+    "sqlfluff.config": "${workspaceFolder}/.sqlfluff",
+    "sqlfluff.env.environmentVariables": [
+        {
+            "key": "example_key",
+            "value": "example_value"
+        }
+    ],
+    "sqlfluff.env.customDotEnvFiles": [
+        "${workspaceFolder}/.env"
+    ],
+    "sqlfluff.env.useDotEnvFile": true,
+    "sqlfluff.excludeRules": [
+        "L009",
+        "AM06: ambiguous.column_references",
+        "RF06: references.quoting",
+        "CP02: capitalisation.identifiers"
+    ],
+    "sqlfluff.ignoreLocalConfig": false,
+    "sqlfluff.ignoreParsing": false,
+    "sqlfluff.rules": [],
+    "sqlfluff.suppressNotifications": false,
+    "sqlfluff.workingDirectory": "${workspaceFolder}/dags/fabric_d365/models",
+    "editor.formatOnSave": false,
+    /* Linter */
+    "sqlfluff.linter.arguments": [],
+    "sqlfluff.linter.diagnosticSeverity": "error",
+    "sqlfluff.linter.diagnosticSeverityByRule": [
+        {
+            "rule": "L010",
+            "severity": "warning"
+        }
+    ],
+    "sqlfluff.linter.lintEntireProject": true,
+    /* Formatter */
+    "sqlfluff.format.arguments": [
+        "--FIX-EVEN-UNPARSABLE"
+    ],
+    "sqlfluff.format.enabled": true,
+    "sqlfluff.shell": false,
+    "dbt.queryScale": "1.16",
+    "dbt.enableNewQueryPanel": true,
+    "terminal.integrated.tabs.defaultColor": "terminal.ansiGreen",
+    "dbt.dbtIntegration": "core",
+    "dbt.dbtPythonPath": "${workspaceFolder}/.venv/Scripts",
+    "dbt.perspectiveTheme": "Vintage"
+}

@@ -1,0 +1,12 @@
+packages:
+  - package: dbt-labs/dbt_utils
+    version: 1.2.0
+  - package: dbt-msft/tsql_utils
+    version: 0.10.0
+  - package: calogica/dbt_date
+    version: 0.9.1
+  - package: dbt-labs/codegen
+    version: 0.12.1
+  - package: dbt-labs/audit_helper
+    version: 0.12.0
+sha1_hash: d162d3e59818443d78f68caa9b98db993ebfbeeb

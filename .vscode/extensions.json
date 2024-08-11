@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "innoverio.vscode-dbt-power-user",
+    "z3z1ma.vscode-dbt-power-user-osmosis",
+    "dorzey.vscode-sqlfluff",
+    "redhat.vscode-yaml",
+    "samuelcolvin.jinjahtml",
+    "plibither8.remove-comments",
+    "ms-azuretools.vscode-azurecontainerapps",
+    "ms-azuretools.vscode-docker",
+    "formulahendry.azure-storage-explorer",
+    "ms-vscode.azure-repos"
+  ]
+}
