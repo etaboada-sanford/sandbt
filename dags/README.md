@@ -10,17 +10,17 @@ To begin working with this project, please ensure that the following tools are a
 
 1. [Visual Studio Code](https://code.visualstudio.com/download)
 2. [Git Bash](https://git-scm.com/download/win) - if working on Windows machine, this is to run shell scripts 
-3. [Python3](https://www.python.org/downloads/release/python-3120/)
+3. [Python3](https://www.python.org/downloads/release/python-3120/) - idealy installed via Chocolatey: choco install python312
 4. [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-5. [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
-
+5. [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli) - install with winget as admin: winget install -e --id Microsoft.AzureCLI
+6. [Microsoft ODBC Driver 18 for SQL Server](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16#download-for-windows)
 
 1. In your VS Code workspace, clone the following repository:
 ```bash
 git clone https://sanfordltd@dev.azure.com/sanfordltd/Data%20and%20Analytics/_git/sandbt
 ```
 
-The folders are arranges as:
+The folders are arranged as:
 ```
   [sandbt] (root folder)
       \_ [.vscode] (folder containing the Visual Studio Code recommended settings and extensions)
@@ -87,8 +87,8 @@ MINGW64 /c/code/sandbt/fabric_d365 (main)
 $ python ./scripts/init.py
 ```
 
-The script will do the following:
+The script will do the following:
 
-1. Read the d365_tables.yml file which contains all the D365 tables required for reporting
-2. Connect to the Dataverse lakehouse to query the columns of the table as provided in the the d365_tables.yml
-3. Build the dbt sources.yml file and store it in ./models/01_lh_bronze/source_fno.yml
+1. Read the d365_tables.yml file which contains all the D365 tables required for reporting
+2. Connect to the lakehouse sources to query the columns of the table as provided in the the d365_tables.yml
+3. Build the dbt sources.yml file and store it in ./models/<medallion architecture layer>/source_<sourcename>.yml
