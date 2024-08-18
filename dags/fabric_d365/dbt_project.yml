@@ -23,9 +23,6 @@ snapshot-paths: [snapshots]
 clean-targets:         # directories to be removed by `dbt clean`
   - target
 
-vars:
-    dbt_date:time_zone: Pacific/Auckland
-
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 
@@ -36,25 +33,19 @@ models:
   d365:
     01_bronze:
     02_silver:
-      +database: sanford_dw
+      +database: dwh_sanford
       +schema: stage
       +materialized: table
     03_gold:
-      +database: sanford_dw
-      dimensions:
-        +schema: dw
-        +materialized: table
-      facts:
-        +schema: dw
-        +materialized: table
+      +database: dwh_sanford
+      +schema: dw
+      +materialized: table
 
 seeds:
   d365:
+    02_silver:
+      +database: dwh_sanford
+      +schema: stage
     03_gold:
-      +database: sanford_dw
-      dimensions:
-        +schema: dw
-      facts:
-        +schema: dw
-      intermediaries:
-        +schema: int
+      +database: dwh_sanford
+      +schema: dw
