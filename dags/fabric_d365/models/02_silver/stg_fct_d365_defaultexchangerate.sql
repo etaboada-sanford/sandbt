@@ -20,8 +20,8 @@ with cte as (
     from {{ source('fno', 'exchangerate') }} as er
     left join {{ source('fno', 'exchangeratecurrencypair') }} as pr on er.exchangeratecurrencypair = pr.recid
     left join {{ source('fno', 'exchangeratetype') }} as ert on pr.exchangeratetype = ert.recid
-    cross apply dbo.ConvertUtcToNzt(er.validfrom) as vfrom
-    cross apply dbo.ConvertUtcToNzt(er.validto) as vto
+    cross apply dbo.f_convert_utc_to_nzt(er.validfrom) as vfrom
+    cross apply dbo.f_convert_utc_to_nzt(er.validto) as vto
     where
         er.[IsDelete] is null
         and pr.[IsDelete] is null

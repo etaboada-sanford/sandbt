@@ -103,7 +103,7 @@ with ct as (
 */
     left join {{source('fno', 'dirpersonuser')}} u on wtt.[user] = u.[user]
     left join {{ref('dim_d365_party')}} p on u.personparty = p.party_recid
-    cross apply dbo.ConvertUtcToNzt(wtt.createddatetime) as apdnz
+    cross apply dbo.f_convert_utc_to_nzt(wtt.createddatetime) as apdnz
     where 
         (
             /* auto Admin approval */

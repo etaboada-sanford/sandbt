@@ -17,7 +17,7 @@ ct as (
             STRING_AGG(concat(convert(date, ctdt.newzealandtime), '#', newdispositioncode, '#', dxc_inventdispositionreasoncode , '#' , dxc_batchdispositiondetails), '|')
             , '|', char(10)), '#', char(9)) as dxc_batchdispositiondetails_history
     from {{ source('fno', 'pdshistoryinventdisposition') }}
-    cross apply dbo.ConvertUtcToNzt(createddatetime) as ctdt
+    cross apply dbo.f_convert_utc_to_nzt(createddatetime) as ctdt
     where coalesce(dxc_inventdispositionreasoncode, '') != ''
         or coalesce(dxc_batchdispositiondetails, '') != ''
     group by 
@@ -35,7 +35,7 @@ ct as (
             , idh.dxc_batchdispositiondetails batchdispositiondetails
             , rank() over (partition by upper(idh.inventbatchid), itemid order by ctdt.newzealandtime desc ) rnk
         from  {{ source('fno', 'pdshistoryinventdisposition') }} idh
-        cross apply dbo.ConvertUtcToNzt(createddatetime) as ctdt
+        cross apply dbo.f_convert_utc_to_nzt(createddatetime) as ctdt
         where coalesce(dxc_inventdispositionreasoncode, '') != ''         
             or coalesce(dxc_batchdispositiondetails, '') != ''
     ) x 
@@ -70,7 +70,7 @@ ct as (
 
     from {{ source('fno', 'pdshistoryinventdisposition') }} pds
     join {{ ref('dim_date') }} dt_today on convert(date, getdate()) = dt_today.calendar_date    
-    cross apply dbo.ConvertUtcToNzt(createddatetime) as ctdt
+    cross apply dbo.f_convert_utc_to_nzt(createddatetime) as ctdt
     where 
         IsDelete is null and 
         (coalesce(dxc_inventdispositionreasoncode, '') != ''

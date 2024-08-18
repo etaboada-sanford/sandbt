@@ -135,7 +135,7 @@ with ctcust as (
                 customer_dataareaid as customer_dataareaid,
                 [IsDelete] as [IsDelete]
                 from
-                'int_nav_dummy_custgroup'  */
+                'stg_nav_dummy_custgroup'  */
 )
 
 select

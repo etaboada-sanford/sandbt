@@ -155,7 +155,7 @@ with d365_sales as (
     left join {{ source('fno', 'GlobalOptionsetMetadata') }} as e on lower(e.[OptionSetName]) = 'documentstatus' and so.documentstatus = e.[Option] and est.[EntityName] = 'salestable'
 
     left join {{ ref('dim_d365_port') }} as prt on so.dxc_destinationlocationcode = prt.portid and prt.port_dataareaid = upper(so.dataareaid)
-    cross apply dbo.ConvertUtcToNzt(so.createddatetime) as createdate
+    cross apply dbo.f_convert_utc_to_nzt(so.createddatetime) as createdate
     where so.[IsDelete] is null
 
 )

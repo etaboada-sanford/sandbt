@@ -27,6 +27,6 @@ inner join {{ source('fno', 'hcmpositiontype') }} as pt on pd.positiontype = pt.
 left join {{ source('fno', 'hcmjob') }} as j on pd.job = j.recid and j.[IsDelete] is null
 left join {{ source('fno', 'hcmtitle') }} as t on pd.title = t.recid and t.[IsDelete] is null
 left join {{ source('fno', 'omoperatingunit') }} as ou on pd.department = ou.recid and ou.[IsDelete] is null
-cross apply dbo.ConvertUtcToNzt(pd.validfrom) as pdvalidfrom
-cross apply dbo.ConvertUtcToNzt(pd.validto) as pdvalidto
+cross apply dbo.f_convert_utc_to_nzt(pd.validfrom) as pdvalidfrom
+cross apply dbo.f_convert_utc_to_nzt(pd.validto) as pdvalidto
 where p.[IsDelete] is null

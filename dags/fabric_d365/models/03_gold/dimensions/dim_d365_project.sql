@@ -72,6 +72,6 @@ left join {{ source('fno', 'hcmworker') }} as w on convert(varchar, pr.workerres
 left join {{ ref('dim_d365_party') }} as pt on w.person = pt.party_recid and pt.[IsDelete] is null
 left join {{ ref('dim_d365_projgroup') }} as pg on pr.projgroupid = pg.projgroupid and upper(pr.dataareaid) = pg.projgroup_dataareaid and pg.[IsDelete] is null
 left join {{ ref('dim_d365_financialdimensionvalueset') }} as fd on pr.defaultdimension = fd.financialdimensionvalueset_recid
-cross apply dbo.ConvertUtcToNzt(pr.createddatetime) as prcreateddatetime
-cross apply dbo.ConvertUtcToNzt(pr.modifieddatetime) as prmodifieddatetime
+cross apply dbo.f_convert_utc_to_nzt(pr.createddatetime) as prcreateddatetime
+cross apply dbo.f_convert_utc_to_nzt(pr.modifieddatetime) as prmodifieddatetime
 where pr.[IsDelete] is null

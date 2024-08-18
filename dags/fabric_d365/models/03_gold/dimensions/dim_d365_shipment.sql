@@ -74,8 +74,8 @@ select
     , shipmentarrival.newzealandtime as shipmentarrivaldatetime_nzt
 from utcbasedata as ut
 cross apply
-    dbo.ConvertUtcToNzt(ut.dropoffdatetime) as dropoff
+    dbo.f_convert_utc_to_nzt(ut.dropoffdatetime) as dropoff
 cross apply
-    dbo.ConvertUtcToNzt(ut.shipconfirmdatetime) as shipconfirm
+    dbo.f_convert_utc_to_nzt(ut.shipconfirmdatetime) as shipconfirm
 cross apply
-    dbo.ConvertUtcToNzt(ut.shipmentarrivaldatetime) as shipmentarrival
+    dbo.f_convert_utc_to_nzt(ut.shipmentarrivaldatetime) as shipmentarrival

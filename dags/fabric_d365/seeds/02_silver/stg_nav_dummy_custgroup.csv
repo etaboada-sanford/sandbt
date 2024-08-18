@@ -1,4 +1,4 @@
-DIM_D365_CUSTOMER_SK,CUSTOMER_RECID,ACCOUNTNUM,INVOICEACCOUNT,OURACCOUNTNUM,ORGNUMBER,NAME,PARTY_RECID,CUSTGROUP,SALESDISTRICTID,SALESDISTRICTGROUPDESC,BLOCKED,PRICEGROUP,DEFAULTDIMENSION_RECID,CUSTOMER_DATAAREAID,ISDELETE
+dim_d365_customer_sk,customer_recid,accountnum,invoiceaccount,ouraccountnum,orgnumber,name,party_recid,custgroup,salesdistrictid,salesdistrictgroupdesc,blocked,pricegroup,defaultdimension_recid,customer_dataareaid,isdelete
 8240344c8807a2e0d0e3cfc001e94350,-999999,NAVEXP00,NAVEXP00,,,Navision not migrated - EXPORT,,EXPORT,,,,,,SANF,0
 51e4735909928cc98cded56dd4041c43,-999998,NAVRET00,NAVRET00,,,Navision not migrated - RETAIL,,RETAIL,,,,,,SANF,0
 ef6735c9ec423cc0b690b1946ac2093f,-999997,NAVWSL00,NAVWSL00,,,Navision not migrated - WSALE,,WSALE,,,,,,SANF,0

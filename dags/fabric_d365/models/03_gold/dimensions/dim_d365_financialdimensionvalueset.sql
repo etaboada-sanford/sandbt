@@ -183,4 +183,4 @@ select
     , null as [IsDelete]
     , dimension_ledgeraccount_text
 from
-    {{ ref('int_nav_financialdimensionvalueset') }}
+    {{ ref('stg_nav_financialdimensionvalueset') }}

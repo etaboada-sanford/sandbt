@@ -27,7 +27,7 @@ select
     , upper(co.dataarea) as buyinglegalentity_dataareaid
 
 from {{ source('fno', 'purchreqtable') }} as pt
-cross apply dbo.ConvertUtcToNzt(pt.submitteddatetime) as sdat
+cross apply dbo.f_convert_utc_to_nzt(pt.submitteddatetime) as sdat
 
 left join {{ source('fno', 'GlobalOptionsetMetadata') }} as eprt
     on pt.purchreqtype = eprt.[Option]

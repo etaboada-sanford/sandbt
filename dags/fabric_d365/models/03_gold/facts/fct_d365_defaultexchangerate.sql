@@ -1,28 +1,30 @@
 /* Default exchange rates to use in stage fact scripts */
 
-select *
-from (
-    select 
-        er.recid exchangerate_recid,
-        pr.fromcurrencycode,
-        pr.tocurrencycode,
-        ert.name exchangerate_name,
-        ert.description exchangerate_description,
-        er.exchangerate*.01 exchangerate,
-        convert(date, er.validfrom) validfrom,
-        convert(date, er.validto) validto,
-        er.partition
+with exch as (
+    select
+        er.recid as exchangerate_recid
+        , pr.fromcurrencycode
+        , pr.tocurrencycode
+        , ert.name as exchangerate_name
+        , ert.description as exchangerate_description
+        , er.partition
+        , er.exchangerate * .01 as exchangerate
+        , convert(date, er.validfrom) as validfrom
+        , convert(date, er.validto) as validto
 
-        , rank() over(partition by fromcurrencycode, tocurrencycode, validfrom, validto
-                        order by er.createddatetime desc, er.recid desc) as rnk
+        , rank() over (
+            partition by fromcurrencycode, tocurrencycode, validfrom, validto
+            order by er.createddatetime desc, er.recid desc
+        ) as rnk
 
-    from {{sources('fno', 'exchangerate')}}  er 
-    left join {{sources('fno', 'exchangeratecurrencypair')}} pr on er.exchangeratecurrencypair = pr.recid
-    left join {{sources('fno', 'exchangeratetype')}} ert on pr.exchangeratetype = ert.recid
-    where 
-        er.IsDelete is null
-        and pr.IsDelete is null
-        and ert.IsDelete is null
-        and exchangerate_name = 'Default'
+    from {{ source('fno', 'exchangerate') }} as er
+    left join {{ source('fno', 'exchangeratecurrencypair') }} as pr on er.exchangeratecurrencypair = pr.recid
+    left join {{ source('fno', 'exchangeratetype') }} as ert on pr.exchangeratetype = ert.recid
+    where
+        er.[IsDelete] is null
+        and pr.[IsDelete] is null
+        and ert.[IsDelete] is null
+        and ert.name = 'Default'
 )
-where rnk = 1    
+
+select * from exch where rnk = 1

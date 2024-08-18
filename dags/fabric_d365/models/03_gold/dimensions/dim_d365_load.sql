@@ -151,14 +151,14 @@ with ld as (
             as st
         on wlt.ordernum = st.salesid
             and upper(wlt.dataareaid) = upper(st.dataareaid)
-    cross apply dbo.ConvertUtcToNzt(wlt.eta) as wlteta
-    cross apply dbo.ConvertUtcToNzt(wlt.etd) as wltetd
-    cross apply dbo.ConvertUtcToNzt(wlt.cutoffutcdatetime) as wltcutoffutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.lastupdateutcdatetime) as wltlastupdateutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.loadarrivalutcdatetime) as wltloadarrivalutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.loadschedshiputcdatetime) as wltloadschedshiputcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.loadshipconfirmutcdatetime) as wltloadshipconfirmutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.sailutcdatetime) as wltsailutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.eta) as wlteta
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.etd) as wltetd
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.cutoffutcdatetime) as wltcutoffutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.lastupdateutcdatetime) as wltlastupdateutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadarrivalutcdatetime) as wltloadarrivalutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadschedshiputcdatetime) as wltloadschedshiputcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadshipconfirmutcdatetime) as wltloadshipconfirmutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.sailutcdatetime) as wltsailutcdatetime
     where wlt.[IsDelete] is null
 
 )

@@ -1,7 +1,7 @@
 version: 2
 
 seeds:
-  - name: int_nav_financialdimensionvalueset
+  - name: stg_nav_financialdimensionvalueset
     config:
       meta:
         owner: kaushal
@@ -39,7 +39,7 @@ seeds:
         isDelete: bit
         dimension_ledgeraccount_text: varchar(8000)
 
-  - name: int_nav_dummy_custgroup
+  - name: stg_nav_dummy_custgroup
     config:
       meta:
         owner: kaushal
@@ -62,7 +62,7 @@ seeds:
         customer_dataareaid: varchar(8000)
         IsDelete: bit
         
-  - name: int_nav_dummy_salesitem
+  - name: stg_nav_dummy_salesitem
     config:
       meta:
         owner: kaushal

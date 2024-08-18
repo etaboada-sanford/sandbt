@@ -45,5 +45,5 @@ left join
 
 left join {{ source('fno', 'dirpersonuser') }} as u on ijt.posteduserid = u.[user]
 left join {{ ref('dim_d365_party') }} as p on u.personparty = p.party_recid
-cross apply dbo.ConvertUtcToNzt(ijt.posteddatetime) as ijtposteddatetime
+cross apply dbo.f_convert_utc_to_nzt(ijt.posteddatetime) as ijtposteddatetime
 where ijt.[IsDelete] is null

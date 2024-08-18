@@ -47,7 +47,7 @@ left join {{ source('fno', 'GlobalOptionsetMetadata') }} as ept
         and ept.[OptionSetName] = 'policytype'
         and ept.[EntityName] = 'syspolicytype'
 
-cross apply dbo.ConvertUtcToNzt(spr.validfrom) as sprvf
-cross apply dbo.ConvertUtcToNzt(spr.validto) as sprvt
+cross apply dbo.f_convert_utc_to_nzt(spr.validfrom) as sprvf
+cross apply dbo.f_convert_utc_to_nzt(spr.validto) as sprvt
 
 where sp.[IsDelete] is null

@@ -220,7 +220,7 @@ with seafood_item_excl as (
     left join {{ ref('dim_d365_financialdimensionvalueset') }} as fdv on i.defaultdimension = fdv.financialdimensionvalueset_recid
 
     left join
-        {{ ref('fct_d365_inventitemprice_latest') }}
+        {{ ref('stg_fct_d365_inventitemprice_latest') }}
             as lcst
         on i.itemid = lcst.itemid and upper(i.dataareaid) = lcst.inventitemprice_dataareaid
             and lcst.inventsiteid = 'TRANSIT'
@@ -403,4 +403,4 @@ select
     , sales_allocation
     , [IsDelete]
     , sales_target_item_flag
-from {{ ref('int_nav_dummy_salesitem') }}
+from {{ ref('stg_nav_dummy_salesitem') }}
