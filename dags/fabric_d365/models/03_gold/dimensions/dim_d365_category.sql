@@ -65,6 +65,5 @@ select
     , '' as category_hierarchy
     , '' as category_path_level
     {% for level in levels -%}
-        ,
-        null as category_path_level_{{ level }}
-        {%- endfor %}
+        , null as category_path_level_{{ level }}
+    {%- endfor %}

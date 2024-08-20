@@ -1,3 +1,10 @@
+{{ config
+(
+materialized= 'incremental',
+unique_key= ['dim_d365_workflowapproval_sk']
+)
+}}
+
 /* Not intended to be an actual dimension table, required for Facts PurchaseOrderLine, PurchaseRequisitionLine & VendPackingSlipLine */
 
 with ct as (
@@ -114,6 +121,35 @@ with ct as (
         )
 )
 
-select * -- {{ dbt_utils.star(from=this, except=["approval_rnk"]) }}
+select dim_d365_workflowapproval_sk,
+  instancenumber,
+  contexttableid,
+  contextrecid,
+  document,
+  documenttype,
+  originator,
+  trackingtype,
+  trackingcontext,
+  approver,
+  approval_context_rnk,
+  approvaldatetime_nzt,
+  documentnum,
+  submitter,
+  createdby,
+  costcentreowner,
+  costcentrevalue,
+  costcentrename,
+  costcentreownerapprovalamount,
+  budgetcontrol,
+  workflowstatus,
+  workflowstatus_line,
+  purchid,
+  purch_recid,
+  purchline_recid,
+  purchreqid,
+  purchreq_recid,
+  purchreqline_recid,
+  dataareaid,
+  approval_rnk
 from ct
 where approval_rnk = 1

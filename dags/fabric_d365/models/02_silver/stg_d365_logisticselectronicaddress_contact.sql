@@ -20,8 +20,9 @@ with electroniccontacts as (
     cross apply stage.f_get_enum_translation('logisticselectronicaddress', '1033') enum
     -- inner join {{ source('fno', 'GlobalOptionsetMetadata') }} as et
     --    on lea.type = et.[Option] and et.[EntityName] = 'logisticselectronicaddress' and et.[OptionSetName] = 'type'
-    where et.[LocalizedLabel] = 'Email address'
-        and coalesce(lea.locator, '') != ''
+    -- where e t .[LocalizedLabel] = 'Email address'
+    where {{ translate_enum('enum', 'lea.type' ) }} = 'Email address'
+       and coalesce(lea.locator, '') != ''
 )
 
 select *

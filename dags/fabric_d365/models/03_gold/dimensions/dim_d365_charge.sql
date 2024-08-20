@@ -1,3 +1,8 @@
+{{ config(
+    materialized= 'incremental', 
+    unique_key= ['dim_d365_charge_sk']
+) }}
+
 select
     m.[Id] as dim_d365_charge_sk
     , m.recid as charge_recid
@@ -34,4 +39,8 @@ left join {{ source('fno', 'GlobalOptionsetMetadata') }} as ev
         m.vendposting = ev.[Option]
         and ev.[OptionSetName] = 'vendposting'
         and ev.[EntityName] = 'markuptable'
+{%- if is_incremental() %}
+where m.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
 where m.[IsDelete] is null
+{% endif -%}

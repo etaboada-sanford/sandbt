@@ -1,7 +1,7 @@
 {{ config(materialized = 'view') }}
 
 select [OptionSetName] as optionsetname
-    , [Option] as option
+    , [Option] as [option]
     , [IsUserLocalizedLabel] as isuserlocalizedlabel
     , [LocalizedLabelLanguageCode] as localizedlabellanguageCode
     , [LocalizedLabel] as localizedlabel
