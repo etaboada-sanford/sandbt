@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['exchangerate_recid']
+) }}
+
 /*
 ItemCode:
 0   Table - ItemId
@@ -78,6 +83,8 @@ with inventpostingmap as (
 
         end as postinggroup
         , upper(ip.dataareaid) as dataareaid
+        , ip.versionnumber
+        , ip.sysrowversion
     from {{ source('fno', 'inventposting') }} as ip
     inner join {{ ref('dim_d365_enum') }} as en on ip.inventaccounttype = en.enum_item_value and upper(en.enumname) = 'inventpostinginventaccounttype'
     where upper(ip.dataareaid) in ('SANF', 'SANA')

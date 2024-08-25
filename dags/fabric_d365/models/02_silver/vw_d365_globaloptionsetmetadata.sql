@@ -3,7 +3,7 @@
 select [OptionSetName] as optionsetname
     , [Option] as [option]
     , [IsUserLocalizedLabel] as isuserlocalizedlabel
-    , [LocalizedLabelLanguageCode] as localizedlabellanguageCode
+    , [LocalizedLabelLanguageCode] as localizedlabellanguagecode
     , [LocalizedLabel] as localizedlabel
     , [GlobalOptionSetName] as globaloptionsetname
     , [EntityName] as entityname

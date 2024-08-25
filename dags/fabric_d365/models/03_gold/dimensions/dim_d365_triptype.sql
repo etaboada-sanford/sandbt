@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_triptype_sk']
+) }}
+
 select
     {{ dbt_utils.generate_surrogate_key(['dt.mserp_triptypeid']) }}  as dim_d365_triptype_sk
     , dt.mserp_triptypeid as triptype_recid
@@ -11,6 +16,8 @@ select
     , dt.mserp_useforecastquantity as useforecastquantity
     , dt.mserp_farmtype as farmtype
     , upper(dt.mserp_dataareaid) as dxc_triptype_dataareaid
-    , dt.[IsDelete]
+    , null as [IsDelete]
+    , 0 as versionnumber
+    , 0 as sysrowversion
 from {{source('mserp', 'dxc_triptype')}} dt
 where dt.[IsDelete] is null

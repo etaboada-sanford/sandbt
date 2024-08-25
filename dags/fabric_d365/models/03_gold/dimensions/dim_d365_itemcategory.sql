@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_itemcategory_sk']
+) }}
+
 with ctitemcat as (
     select
         x.*
@@ -25,6 +30,9 @@ with ctitemcat as (
             , pcat.category as category_recid
             , rank() over (partition by i.recid, cat.category_path_level_1 order by pcat.recid desc) as rnk
             , upper(i.dataareaid) as itemcategory_dataareaid
+            , i.[IsDelete]
+            , i.versionnumber
+            , i.sysrowversion
         from {{ source('fno', 'inventtable') }} as i
         inner join
             {{ source('fno', 'ecoresproduct') }}
@@ -45,7 +53,11 @@ with ctitemcat as (
         inner join {{ ref('dim_d365_category') }} as cat on pcat.category = cat.category_recid
         left join {{ source('fno', 'GlobalOptionsetMetadata') }} as enum
             on p.producttype = enum.[Option] and enum.[OptionSetName] = 'producttype'
-        where i.[IsDelete] is null
+        {%- if is_incremental() %}
+            where i.sysrowversion > {{ get_max_sysrowversion() }}
+        {%- else %}
+            where i.[IsDelete] is null
+        {% endif %}
     ) as x
     where x.rnk = 1
 )
@@ -70,4 +82,7 @@ select
     , item_recid
     , category_recid
     , partition
+    , [IsDelete]
+    , versionnumber
+    , sysrowversion
 from ctitemcat

@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_chartofaccounts_sk']
+) }}
+
 select
     ac.[Id] as dim_d365_chartofaccounts_sk
     , ac.recid as chartofaccount_recid
@@ -7,10 +12,13 @@ select
     , acc.accountcategory
     , acc.accounttype
     , ac.[IsDelete]
-from
-    {{ source('fno', 'mainaccount') }} as ac
-left join
-    {{ source('fno', 'mainaccountcategory') }} as acc
+    , ac.versionnumber
+    , ac.sysrowversion
+from {{ source('fno', 'mainaccount') }} as ac
+left join {{ source('fno', 'mainaccountcategory') }} as acc
     on ac.accountcategoryref = acc.accountcategoryref
-where
-    ac.[IsDelete] is null
+{%- if is_incremental() %}
+    where ac.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where ac.[IsDelete] is null
+{% endif %}

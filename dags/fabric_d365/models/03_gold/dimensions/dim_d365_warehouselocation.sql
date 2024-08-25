@@ -1,25 +1,36 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_warehouselocation_sk']
+) }}
+
 with ctw as (
     select
-        [Id] as dim_d365_warehouselocation_sk
-        , recid as warehouselocation_recid
-        , wmslocationid as warehouselocationid
-        , absoluteheight
-        , aisleid
-        , depth
-        , height
-        , volume
-        , width
-        , inputlocation
-        , inventlocationid as warehouseid
-        , locprofileid
-        , locationtype
-        , zoneid
-        , level
-        , partition
-        , [IsDelete]
-        , upper(dataareaid) as warehouselocation_dataareaid
-    from {{ source('fno', 'wmslocation') }}
-    where [IsDelete] is null
+        whl.[Id] as dim_d365_warehouselocation_sk
+        , whl.recid as warehouselocation_recid
+        , whl.wmslocationid as warehouselocationid
+        , whl.absoluteheight
+        , whl.aisleid
+        , whl.depth
+        , whl.height
+        , whl.volume
+        , whl.width
+        , whl.inputlocation
+        , whl.inventlocationid as warehouseid
+        , whl.locprofileid
+        , whl.locationtype
+        , whl.zoneid
+        , whl.level
+        , whl.partition
+        , whl.[IsDelete]
+        , upper(whl.dataareaid) as warehouselocation_dataareaid
+        , whl.versionnumber
+        , whl.sysrowversion
+    from {{ source('fno', 'wmslocation') }} as whl
+    {%- if is_incremental() %}
+        where whl.sysrowversion > {{ get_max_sysrowversion() }}
+    {% else %}
+        where  whl.[IsDelete] is null
+    {% endif %}
 )
 
 select

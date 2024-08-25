@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_vendor_sk']
+) }}
+
 select
     v.[Id] as dim_d365_vendor_sk
     , v.recid as vendor_recid
@@ -49,15 +54,19 @@ select
             else lpa.address
         end
     ) as primary_address
-from
-    {{ source('fno', 'vendtable') }} as v
+    , v.versionnumber
+    , v.sysrowversion
+from {{ source('fno', 'vendtable') }} as v
 left join {{ source('fno', 'vw_dirpartytable') }} as p on v.party = p.recid and p.[IsDelete] is null
 left join {{ source('fno', 'logisticslocation') }} as ll on p.primaryaddresslocation = ll.recid
 left join {{ source('fno', 'logisticspostaladdress') }} as lpa on ll.recid = lpa.location and getdate() between lpa.validfrom and lpa.validto
 left join {{ source('fno', 'GlobalOptionsetMetadata') }} as eb on eb.[OptionSetName] = 'blocked' and eb.[EntityName] = 'vendtable' and v.blocked = eb.[Option]
-left join {{ ref('stg_d365_logisticselectronicaddress_contact_poconfirm') }} as email_po on v.party = email_po.party_recid
-left join {{ ref('stg_d365_logisticselectronicaddress_contact_invoice') }} as email_invoice on v.party = email_invoice.party_recid
-left join {{ ref('stg_d365_logisticselectronicaddress_contact_remitto') }} as email_remit on v.party = email_remit.party_recid
-left join {{ ref('stg_d365_logisticselectronicaddress_contact_rfq') }} as email_rfq on v.party = email_rfq.party_recid
-where
-    v.[IsDelete] is null
+left join {{ ref('stg_d365_lea_contact_poconfirm') }} as email_po on v.party = email_po.party_recid
+left join {{ ref('stg_d365_lea_contact_invoice') }} as email_invoice on v.party = email_invoice.party_recid
+left join {{ ref('stg_d365_lea_contact_remitto') }} as email_remit on v.party = email_remit.party_recid
+left join {{ ref('stg_d365_lea_contact_rfq') }} as email_rfq on v.party = email_rfq.party_recid
+{%- if is_incremental() %}
+    where v.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where v.[IsDelete] is null
+{% endif %}

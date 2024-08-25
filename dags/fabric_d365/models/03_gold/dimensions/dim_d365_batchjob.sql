@@ -1,6 +1,6 @@
 {{ config(
-    materialized= 'incremental', 
-    unique_key= ['dim_d365_batchjob_sk']
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_batchjob_sk']
 ) }}
 
 select
@@ -11,14 +11,14 @@ select
     , bj.enddatetime
     , bj.executingby
     , bj.[IsDelete]
+    , bj.versionnumber
+    , bj.sysrowversion
     , upper(
         bj.company
     ) as batchjob_dataareaid
-    , bj.versionnumber
-    , bj.sysrowversion
 from {{ source('fno', 'batchjob') }} as bj
 {%- if is_incremental() %}
-where bj.sysrowversion > {{ get_max_sysrowversion() }}
+    where bj.sysrowversion > {{ get_max_sysrowversion() }}
 {% else %}
-where abj.[IsDelete] is null
-{% endif -%}
+    where bj.[IsDelete] is null
+{% endif %}

@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_vendorpackingslip_sk']
+) }}
+
 select
     v.[Id] as dim_d365_vendorpackingslip_sk
 
@@ -25,8 +30,8 @@ select
     , upper(v.intercompanycompanyid) as intercompanycompanyid
 
     , coalesce(p.name, po.orderer) as requester
-
-
+    , v.versionnumber
+    , v.sysrowversion
 from {{ source('fno', 'vendpackingslipjour') }} as v
 left join
     {{ source('fno', 'GlobalOptionsetMetadata') }}
@@ -42,4 +47,8 @@ left join
     on upper(v.dataareaid) = po.purchaseorder_dataareaid
         and v.purchid = po.purchid
 
-where v.[IsDelete] is null
+{%- if is_incremental() %}
+    where v.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where  v.[IsDelete] is null
+{% endif %}

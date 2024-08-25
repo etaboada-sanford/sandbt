@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_haultrawltrip_sk']
+) }}
+
 select
     {{ dbt_utils.generate_surrogate_key(['mserp_primaryfield']) }} as dim_d365_haultrawltrip_sk
 
@@ -16,8 +21,9 @@ select
     , mserp_landedportid as landedportid
     , mserp_mscid as mscid
     , upper(mserp_dataareaid) as haultrawltrip_dataareaid
-    , null as partition
+    , null as [partition]
     , null as [IsDelete]
-
+    , 0 as versionnumber
+    , 0 as sysrowversion
 from {{ source('mserp', 'dxc_haultrawl') }}
 -- where [IsDelete] is null

@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_shipment_sk']
+) }}
+
 with utcbasedata as (
     select
         wst.[Id] as dim_d365_shipment_sk
@@ -33,6 +38,8 @@ with utcbasedata as (
         , case when wst.shipconfirmutcdatetime = '1900-01-01 00:00:00.000' then null else wst.shipconfirmutcdatetime end as shipconfirmdatetime
         , case when wst.shipmentarrivalutcdatetime = '1900-01-01 00:00:00.000' then null else wst.shipmentarrivalutcdatetime end as shipmentarrivaldatetime
         , upper(wst.dataareaid) as shipment_dataareaid
+        , wst.versionnumber
+        , wst.sysrowversion
 
     from {{ source('fno', 'whsshipmenttable') }} as wst
     left join
@@ -64,7 +71,11 @@ with utcbasedata as (
         on wst.deliverypostaladdress = ad.recid
             and ad.[IsDelete] is null
 
-    where wst.[IsDelete] is null
+    {%- if is_incremental() %}
+        where wst.sysrowversion > {{ get_max_sysrowversion() }}
+    {%- else %}
+        where wst.[IsDelete] is null
+    {% endif %}
 )
 
 select
@@ -73,9 +84,6 @@ select
     , shipconfirm.newzealandtime as shipconfirmdatetime_nzt
     , shipmentarrival.newzealandtime as shipmentarrivaldatetime_nzt
 from utcbasedata as ut
-cross apply
-    dbo.f_convert_utc_to_nzt(ut.dropoffdatetime) as dropoff
-cross apply
-    dbo.f_convert_utc_to_nzt(ut.shipconfirmdatetime) as shipconfirm
-cross apply
-    dbo.f_convert_utc_to_nzt(ut.shipmentarrivaldatetime) as shipmentarrival
+cross apply dbo.f_convert_utc_to_nzt(ut.dropoffdatetime) as dropoff
+cross apply dbo.f_convert_utc_to_nzt(ut.shipconfirmdatetime) as shipconfirm
+cross apply dbo.f_convert_utc_to_nzt(ut.shipmentarrivaldatetime) as shipmentarrival

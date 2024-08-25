@@ -1,5 +1,10 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['fct_d365_vendorinvoiceline_sk']
+) }}
+
 select
-    {{ dbt_utils.generate_surrogate_key(['l.recid']) }} as fact_d365_vendorinvoiceline_sk
+    {{ dbt_utils.generate_surrogate_key(['l.recid']) }} as fct_d365_vendorinvoiceline_sk
     , l.recid as invoiceline_recid
     , j.recid as invoicejour_recid
 
@@ -67,6 +72,8 @@ select
 
     , upper(l.purchunit) as purchunit
     , upper(l.dataareaid) as vendorinvoiceline_dataareaid
+    , l.versionnumber
+    , l.sysrowversion
 
 from {{ source('fno', 'vendinvoicetrans') }} as l
 inner join {{ source('fno', 'vendinvoicejour') }} as j

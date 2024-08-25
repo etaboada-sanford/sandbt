@@ -1,7 +1,14 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_item_sk']
+) }}
+
 with seafood_item_excl as (
     select distinct
         itemid
         , dataareaid
+        , versionnumber
+        , sysrowversion
     from {{ source('fno', 'inventtable') }}
     where
         (

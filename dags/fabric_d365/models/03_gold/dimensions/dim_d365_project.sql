@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_project_sk']
+) }}
+
 select
     pr.[Id] as dim_d365_project_sk
     , pr.recid as project_recid
@@ -66,6 +71,8 @@ select
     , convert(date, prcreateddatetime.newzealandtime) as createddatetime
     , convert(date, prmodifieddatetime.newzealandtime) as modifieddatetime
     , upper(pr.dataareaid) as project_dataareaid
+    , pr.versionnumber
+    , pr.sysrowversion
 from {{ source('fno', 'projtable') }} as pr
 left join {{ source('fno', 'GlobalOptionsetMetadata') }} as e on e.[OptionSetName] = 'status' and pr.status = e.[Option] and e.[EntityName] = 'projtable'
 left join {{ source('fno', 'hcmworker') }} as w on convert(varchar, pr.workerresponsible) = convert(varchar, w.recid) and w.[IsDelete] is null
@@ -74,4 +81,8 @@ left join {{ ref('dim_d365_projgroup') }} as pg on pr.projgroupid = pg.projgroup
 left join {{ ref('dim_d365_financialdimensionvalueset') }} as fd on pr.defaultdimension = fd.financialdimensionvalueset_recid
 cross apply dbo.f_convert_utc_to_nzt(pr.createddatetime) as prcreateddatetime
 cross apply dbo.f_convert_utc_to_nzt(pr.modifieddatetime) as prmodifieddatetime
-where pr.[IsDelete] is null
+{%- if is_incremental() %}
+    where pr.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where pr.[IsDelete] is null
+{% endif %}

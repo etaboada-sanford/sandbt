@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['exchangerate_recid']
+) }}
+
 with ct1price as (
     select * from (
         select
@@ -12,6 +17,8 @@ with ct1price as (
             , ip.createddatetime
             , case when ip.priceunit in (0, 1) then ip.price else ip.price / ip.priceunit end as unitcost
             , upper(ip.dataareaid) as inventitemprice_dataareaid
+            , ip.versionnumber
+            , ip.sysrowversion
             /* must order by activation date DESC and recid DESC (created date is not unique enough) */
             , rank() over (
                 partition by ip.dataareaid, id.inventsiteid, ip.itemid

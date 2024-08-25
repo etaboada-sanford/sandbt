@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_signinglimitpolicyrule_sk']
+) }}
+
 select
     spr.[Id] as dim_d365_signinglimitpolicyrule_sk
     , spr.recid as syspolicyrule_recid
@@ -22,6 +27,9 @@ select
             then 1
         else 0
     end as isvalid
+    , sp.[IsDelete]
+    , sp.versionnumber
+    , sp.sysrowversion
 
 from {{ source('fno', 'syspolicy') }} as sp
 
@@ -50,4 +58,8 @@ left join {{ source('fno', 'GlobalOptionsetMetadata') }} as ept
 cross apply dbo.f_convert_utc_to_nzt(spr.validfrom) as sprvf
 cross apply dbo.f_convert_utc_to_nzt(spr.validto) as sprvt
 
-where sp.[IsDelete] is null
+{%- if is_incremental() %}
+    where sp.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where sp.[IsDelete] is null
+{% endif %}

@@ -46,6 +46,7 @@ sources:
     - dimensionhierarchylevel
     - dirnameaffix
     - dirorganization
+    - dirorganizationbase
     - dirpartylocation
     - dirpartylocationrole
     - dirpartytable
@@ -55,8 +56,11 @@ sources:
     - dlvmode
     - ecorescategory
     - ecorescategoryhierarchy
+    - ecoresdistinctproduct
+    - ecoresdistinctproductvariant
     - ecoresproduct
     - ecoresproductcategory
+    - ecoresproductmaster
     - ecoresproducttranslation
     - ecoresstoragedimensiongroup
     - ecoresstoragedimensiongroupitem
@@ -132,7 +136,10 @@ sources:
     - markuptrans
     - omhierarchyrelationship
     - omhierarchytype
+    - ominternalorganization
     - omoperatingunit
+    - omteam
+    - pcclass
     - pdsbatchattrib
     - pdsbatchattribgroup
     - pdsbatchattributes

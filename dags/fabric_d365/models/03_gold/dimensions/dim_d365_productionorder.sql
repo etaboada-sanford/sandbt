@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_productionorder_sk']
+) }}
+
 select
     pt.[Id] as dim_d365_productionorder_sk
     , pt.recid as productionorder_recid
@@ -50,6 +55,8 @@ select
     end as reportdate
     , coalesce(eirt.[LocalizedLabel], 'None') as inventreftype
     , upper(pt.dataareaid) as prod_dataareaid
+    , pt.versionnumber
+    , pt.sysrowversion
 from {{ source('fno', 'prodtable') }} as pt
 
 left join
@@ -88,4 +95,8 @@ left join
     on eirt.[OptionSetName] = 'inventreftype'
         and pt.inventreftype = eirt.[Option]
         and eirt.[EntityName] = 'prodtable'
-where pt.[IsDelete] is null
+{%- if is_incremental() %}
+    where pt.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where pt.[IsDelete] is null
+{% endif %}

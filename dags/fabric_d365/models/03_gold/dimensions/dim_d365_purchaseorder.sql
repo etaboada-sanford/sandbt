@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_purchaseorder_sk']
+) }}
+
 select
     {{ dbt_utils.generate_surrogate_key(['pt.recid']) }} as dim_d365_purchaseorder_sk
     , pt.recid as purchaseorder_recid
@@ -35,6 +40,8 @@ select
     , p.name as orderer
     , pt.partition
     , pt.[IsDelete]
+    , pt.versionnumber
+    , pt.sysrowversion
 
 from {{ source('fno', 'purchtable') }} as pt
 
@@ -61,5 +68,8 @@ left join
 
 left join {{ source('fno', 'hcmworker') }} as h on pt.workerpurchplacer = h.recid
 left join {{ ref('dim_d365_party') }} as p on h.person = p.party_recid
-
-where pt.[IsDelete] is null
+{%- if is_incremental() %}
+    where pt.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where pt.[IsDelete] is null
+{% endif %}

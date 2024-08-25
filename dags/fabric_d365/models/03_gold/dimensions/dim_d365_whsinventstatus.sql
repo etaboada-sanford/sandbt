@@ -1,11 +1,22 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_whsinventstatus_sk']
+) }}
+
 select
-    [Id] as dim_d365_whsinventstatus_sk
-    , recid as whsinventstatus_recid
-    , inventstatusid
-    , name
-    , inventstatusblocking
-    , partition
-    , [IsDelete]
-    , upper(dataareaid) as whsinventstatus_dataareaid
-from {{ source('fno', 'whsinventstatus') }}
-where [IsDelete] is null
+    whs.[Id] as dim_d365_whsinventstatus_sk
+    , whs.recid as whsinventstatus_recid
+    , whs.inventstatusid
+    , whs.name
+    , whs.inventstatusblocking
+    , whs.partition
+    , whs.[IsDelete]
+    , upper(whs.dataareaid) as whsinventstatus_dataareaid
+    , whs.versionnumber
+    , whs.sysrowversion
+from {{ source('fno', 'whsinventstatus') }} as whs
+{%- if is_incremental() %}
+    where whs.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where  whs.[IsDelete] is null
+{% endif %}

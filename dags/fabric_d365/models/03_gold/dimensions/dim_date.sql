@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'table', 
+    unique_key = ['dim_date_key']
+) }}
+
 with source as (
     select
         cast(convert(varchar, date, 112) as int) as dim_date_key

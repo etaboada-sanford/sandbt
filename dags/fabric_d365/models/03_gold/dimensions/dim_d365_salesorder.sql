@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_salesorder_sk']
+) }}
+
 with d365_sales as (
     select
         so.[Id] as dim_d365_salesorder_sk
@@ -137,6 +142,8 @@ with d365_sales as (
                                                 when so.dlvmode = 'TL' then 1 else 0
                                                 end*/
         end as local_freight
+        , so.versionnumber
+        , so.sysrowversion
 
     from {{ source('fno', 'salestable') }} as so
 
@@ -156,7 +163,11 @@ with d365_sales as (
 
     left join {{ ref('dim_d365_port') }} as prt on so.dxc_destinationlocationcode = prt.portid and prt.port_dataareaid = upper(so.dataareaid)
     cross apply dbo.f_convert_utc_to_nzt(so.createddatetime) as createdate
-    where so.[IsDelete] is null
+    {%- if is_incremental() %}
+        where so.sysrowversion > {{ get_max_sysrowversion() }}
+    {%- else %}
+        where so.[IsDelete] is null
+    {% endif %}
 
 )
 
@@ -240,7 +251,8 @@ select
     , d365_sales.continent
     , d365_sales.partition
     , d365_sales.[IsDelete]
-
+    , d365_sales.versionnumber
+    , d365_sales.sysrowversion
 from d365_sales
 left join lastld
     on d365_sales.salesorder_dataareaid = lastld.load_dataareaid
@@ -309,4 +321,6 @@ select
     , null as port_country_name
     , null as continent
     , 5637144576 as partition
-    , 0 as [IsDelete]
+    , null as [IsDelete]
+    , 0 as versionnumber
+    , 0 as sysrowversion

@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_financialdimensionaccount_sk']
+) }}
+
 select
     *
     , 'gl_category_l1' as gl_category_l1
@@ -54,6 +59,8 @@ from (
         , d.d8_legalentityvalue
         , d.partition
         , d.[IsDelete]
+        , d.versionnumber
+        , d.sysrowversion
         , concat(
             coalesce(d.mainaccountvalue, '')
             , '-', coalesce(d.d1_businessunitvalue, '')
@@ -65,7 +72,6 @@ from (
             , '-', coalesce(d.d7_projectvalue, '')
             , '-', coalesce(d.d8_legalentityvalue, '')
         ) as dimension_ledgeraccount
-
     from {{ source('fno', 'dimensionattributevaluecombination') }} as d
     left join {{ source('fno', 'mainaccount') }} as m on d.mainaccount = m.recid
     left join {{ source('fno', 'omoperatingunit') }} as d1 on d.d1_businessunit = d1.recid
@@ -78,7 +84,9 @@ from (
     left join {{ source('fno', 'dirpartytable') }} as d5pt on convert(varchar, d5.party) = convert(varchar, d5pt.recid)
     left join {{ source('fno', 'vendtable') }} as d6 on d.d6_vendor = d6.recid
     left join {{ source('fno', 'dirpartytable') }} as d6pt on convert(varchar, d6.party) = convert(varchar, d6pt.recid)
-
-    where d.[IsDelete] is null
-
+    {%- if is_incremental() %}
+        where d.sysrowversion > {{ get_max_sysrowversion() }}
+    {% else %}
+        where d.[IsDelete] is null
+    {% endif %}
 ) as x

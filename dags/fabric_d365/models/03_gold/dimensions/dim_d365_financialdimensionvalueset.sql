@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_financialdimensionvalueset_sk']
+) }}
+
 with dimattrib as (
     select
         d.[Id] as dim_d365_financialdimensionvalueset_sk
@@ -37,6 +42,8 @@ with dimattrib as (
         , d.partition
 
         , d.[IsDelete]
+        , d.versionnumber
+        , d.sysrowversion
         , case
             when
                 len(coalesce(d.mainaccountvalue, '')) > 0
@@ -87,8 +94,11 @@ with dimattrib as (
     left join {{ ref('stg_d365_davs_department') }} as d3 on d.recid = d3.financialdimensionvalueset_recid
     left join {{ ref('stg_d365_davs_customer') }} as d5pt on d.recid = d5pt.financialdimensionvalueset_recid
     left join {{ ref('stg_d365_davs_vendor') }} as d6pt on d.recid = d6pt.financialdimensionvalueset_recid
-    where
-        d.[IsDelete] is null
+    {%- if is_incremental() %}
+        where d.sysrowversion > {{ get_max_sysrowversion() }}
+    {% else %}
+        where d.[IsDelete] is null
+    {% endif %}
 )
 
 , dal as (
@@ -117,70 +127,74 @@ with dimattrib as (
 )
 
 select
-    dim_d365_financialdimensionvalueset_sk
-    , financialdimensionvalueset_recid
-    , dimension_ledgeraccount
-    , mainaccount
-    , mainaccountvalue
-    , mainaccountname
-    , d1_businessunit
-    , d1_businessunitvalue
-    , d1_businessunit_name
-    , d2_costcenter
-    , d2_costcentervalue
-    , d2_costcenter_name
-    , d4_function
-    , d4_functionvalue
-    , d4_function_name
-    , d3_department
-    , d3_departmentvalue
-    , d3_department_name
-    , d5_customer
-    , d5_customervalue
-    , d5_customer_name
-    , d6_vendor
-    , d6_vendorvalue
-    , d6_vendor_name
-    , d7_project
-    , d7_projectvalue
-    , d8_legalentity
-    , d8_legalentityvalue
-    , partition
-    , null as [IsDelete]
-    , dimension_ledgeraccount_text
+    dal.dim_d365_financialdimensionvalueset_sk
+    , dal.financialdimensionvalueset_recid
+    , dal.dimension_ledgeraccount
+    , dal.mainaccount
+    , dal.mainaccountvalue
+    , dal.mainaccountname
+    , dal.d1_businessunit
+    , dal.d1_businessunitvalue
+    , dal.d1_businessunit_name
+    , dal.d2_costcenter
+    , dal.d2_costcentervalue
+    , dal.d2_costcenter_name
+    , dal.d4_function
+    , dal.d4_functionvalue
+    , dal.d4_function_name
+    , dal.d3_department
+    , dal.d3_departmentvalue
+    , dal.d3_department_name
+    , dal.d5_customer
+    , dal.d5_customervalue
+    , dal.d5_customer_name
+    , dal.d6_vendor
+    , dal.d6_vendorvalue
+    , dal.d6_vendor_name
+    , dal.d7_project
+    , dal.d7_projectvalue
+    , dal.d8_legalentity
+    , dal.d8_legalentityvalue
+    , dal.partition
+    , dal.dimension_ledgeraccount_text
+    , dal.[IsDelete]
+    , dal.versionnumber
+    , dal.sysrowversion
 from dal
 union all
 select
-    dim_d365_financialdimensionvalueset_sk
-    , financialdimensionvalueset_recid
-    , dimension_ledgeraccount
-    , mainaccount
-    , mainaccountvalue
-    , mainaccountname
-    , d1_businessunit
-    , d1_businessunitvalue
-    , d1_businessunit_name
-    , d2_costcenter
-    , d2_costcentervalue
-    , d2_costcenter_name
-    , d4_function
-    , d4_functionvalue
-    , d4_function_name
-    , d3_department
-    , d3_departmentvalue
-    , d3_department_name
-    , d5_customer
-    , d5_customervalue
-    , d5_customer_name
-    , d6_vendor
-    , d6_vendorvalue
-    , d6_vendor_name
-    , d7_project
-    , d7_projectvalue
-    , d8_legalentity
-    , d8_legalentityvalue
-    , partition
-    , null as [IsDelete]
-    , dimension_ledgeraccount_text
+    fdv.dim_d365_financialdimensionvalueset_sk
+    , fdv.financialdimensionvalueset_recid
+    , fdv.dimension_ledgeraccount
+    , fdv.mainaccount
+    , fdv.mainaccountvalue
+    , fdv.mainaccountname
+    , fdv.d1_businessunit
+    , fdv.d1_businessunitvalue
+    , fdv.d1_businessunit_name
+    , fdv.d2_costcenter
+    , fdv.d2_costcentervalue
+    , fdv.d2_costcenter_name
+    , fdv.d4_function
+    , fdv.d4_functionvalue
+    , fdv.d4_function_name
+    , fdv.d3_department
+    , fdv.d3_departmentvalue
+    , fdv.d3_department_name
+    , fdv.d5_customer
+    , fdv.d5_customervalue
+    , fdv.d5_customer_name
+    , fdv.d6_vendor
+    , fdv.d6_vendorvalue
+    , fdv.d6_vendor_name
+    , fdv.d7_project
+    , fdv.d7_projectvalue
+    , fdv.d8_legalentity
+    , fdv.d8_legalentityvalue
+    , fdv.partition
+    , fdv.dimension_ledgeraccount_text
+    , fdv.[IsDelete]
+    , fdv.versionnumber
+    , fdv.sysrowversion
 from
-    {{ ref('stg_nav_financialdimensionvalueset') }}
+    {{ ref('stg_nav_financialdimensionvalueset') }} as fdv

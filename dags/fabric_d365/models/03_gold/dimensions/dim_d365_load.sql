@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_load_sk']
+) }}
+
 with ld as (
     select
         wlt.[Id] as dim_d365_load_sk
@@ -85,6 +90,8 @@ with ld as (
         , w.name as warehouse_name
         , upper(wlt.dataareaid) as load_dataareaid
         , wlt.[IsDelete]
+        , wlt.versionnumber
+        , wlt.sysrowversion
 
     from {{ source('fno', 'whsloadtable') }} as wlt
     left join
@@ -159,7 +166,11 @@ with ld as (
     cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadschedshiputcdatetime) as wltloadschedshiputcdatetime
     cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadshipconfirmutcdatetime) as wltloadshipconfirmutcdatetime
     cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.sailutcdatetime) as wltsailutcdatetime
-    where wlt.[IsDelete] is null
+    {%- if is_incremental() %}
+        where wlt.sysrowversion > {{ get_max_sysrowversion() }}
+    {%- else %}
+        where wlt.[IsDelete] is null
+    {% endif %}
 
 )
 
@@ -242,5 +253,6 @@ select
     , warehouse_name
     , load_dataareaid
     , [IsDelete]
-
+    , versionnumber
+    , sysrowversion
 from ld

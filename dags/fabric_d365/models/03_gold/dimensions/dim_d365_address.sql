@@ -27,6 +27,8 @@ select
     , a.dxc_locationcode
     , a.partition
     , a.[IsDelete]
+    , a.versionnumber
+    , a.sysrowversion
     , upper(a.countryregionid) as countryregionid
     , case
         when
@@ -34,11 +36,9 @@ select
             or a.validto is null then 1
         else 0
     end as isvalid
-    , a.versionnumber
-    , a.sysrowversion
 from {{ source('fno', 'logisticspostaladdress') }} as a
 {%- if is_incremental() %}
-where a.sysrowversion > {{ get_max_sysrowversion() }}
+    where a.sysrowversion > {{ get_max_sysrowversion() }}
 {% else %}
-where a.[IsDelete] is null
-{% endif -%}
+    where a.[IsDelete] is null
+{% endif %}

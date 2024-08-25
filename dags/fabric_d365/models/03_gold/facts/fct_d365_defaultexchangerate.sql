@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['exchangerate_recid']
+) }}
+
 /* Default exchange rates to use in stage fact scripts */
 
 with exch as (
@@ -16,7 +21,8 @@ with exch as (
             partition by fromcurrencycode, tocurrencycode, validfrom, validto
             order by er.createddatetime desc, er.recid desc
         ) as rnk
-
+        , er.versionnumber
+        , er.sysrowversion
     from {{ source('fno', 'exchangerate') }} as er
     left join {{ source('fno', 'exchangeratecurrencypair') }} as pr on er.exchangeratecurrencypair = pr.recid
     left join {{ source('fno', 'exchangeratetype') }} as ert on pr.exchangeratetype = ert.recid

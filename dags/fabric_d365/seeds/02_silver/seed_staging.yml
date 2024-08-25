@@ -1,6 +1,15 @@
 version: 2
 
 seeds:
+  - name: stg_d365_consolidationcompanies
+    config:
+      meta:
+        owner: kaushal
+        tags: ["d365", "static_data"]
+      column_types:
+        company_dataarea: varchar(10)
+        consolidated_parent_co_dataarea: varchar(10)
+        
   - name: stg_nav_financialdimensionvalueset
     config:
       meta:
@@ -36,8 +45,10 @@ seeds:
         d8_legalentity : bigint
         d8_legalentityvalue: varchar(8000)
         partition : varchar(8000)
-        isDelete: bit
         dimension_ledgeraccount_text: varchar(8000)
+        IsDelete: bit
+        versionnumber: bigint
+        sysrowversion: bigint
 
   - name: stg_nav_dummy_custgroup
     config:
@@ -50,7 +61,7 @@ seeds:
         accountnum: varchar(8000)
         invoiceaccount: varchar(8000)
         ouraccountnum: varchar(8000)
-        orgbigint: varchar(8000)
+        orgnumber: varchar(8000)
         name: varchar(8000)
         party_recid: bigint
         custgroup: varchar(8000)
@@ -61,6 +72,8 @@ seeds:
         defaultdimension_recid: bigint
         customer_dataareaid: varchar(8000)
         IsDelete: bit
+        versionnumber: bigint
+        sysrowversion: bigint
         
   - name: stg_nav_dummy_salesitem
     config:

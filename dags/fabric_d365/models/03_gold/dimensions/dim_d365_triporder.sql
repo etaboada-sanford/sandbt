@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_triporder_sk']
+) }}
+
 /* Trips were not migrated from NAV, but we have SoH & Production in D365 for non-existant trips, so Prod Vol reporting does not assign Trip
     add in NAV trips where D365 batch references NAV Trip, that is not in D365
 */
@@ -44,6 +49,8 @@ with trip_d365 as (
 
         , flc.mserp_vendor1percent / 100 as vendor1percent
         , upper(dto.mserp_dataareaid) as triporder_dataareaid
+        , 0 as versionnumber
+        , 0 as sysrowversion
     from {{ source('mserp', 'dxc_triporder') }} as dto
     left join {{ ref('dim_d365_vendor') }} as v on dto.mserp_vendaccount = v.accountnum and upper(dto.mserp_dataareaid) = v.vendor_dataareaid
     left join {{ source('mserp', 'dxc_farmlinecage') }} as flc
@@ -52,7 +59,11 @@ with trip_d365 as (
             and upper(dto.mserp_farmlinecageid) = upper(flc.mserp_farmlinecageid)
             and dto.mserp_catchharvestareaid = flc.mserp_catchharvestareaid
             and flc.[IsDelete] is null
-    where dto.[IsDelete] is null
+    {%- if is_incremental() %}
+        where dto.sysrowversion > {{ get_max_sysrowversion() }}
+    {%- else %}
+        where dto.[IsDelete] is null
+    {% endif %}
 )
 
 , trip_nav as (
@@ -122,6 +133,8 @@ select
     , null as inventsiteid
     , null as inventlocationid
 
-    , 0 as isdelete
     , 'SANF' as triporder_dataareaid
+    , null as [IsDelete]
+    , 0 as versionnumber
+    , 0 as sysrowversion
 from trip_nav

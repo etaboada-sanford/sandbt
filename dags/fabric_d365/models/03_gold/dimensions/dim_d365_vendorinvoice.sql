@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_vendorinvoice_sk']
+) }}
+
 select
     j.[Id] as dim_d365_vendorinvoice_sk
 
@@ -42,10 +47,16 @@ select
     , convert(date, j.fixedduedate) as fixedduedate
     , case when convert(date, j.receiveddate) = '1900-01-01' then null else convert(date, j.receiveddate) end as receiveddate
     , upper(j.intercompanycompanyid) as intercompanycompanyid
+    , j.versionnumber
+    , j.sysrowversion
 from {{ source('fno', 'vendinvoicejour') }} as j
 left join
     {{ source('fno', 'GlobalOptionsetMetadata') }}
         as ept
     on lower(ept.[OptionSetName]) = lower('purchasetype')
         and j.purchasetype = ept.[Option]
-where j.[IsDelete] is null
+{%- if is_incremental() %}
+    where j.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where  j.[IsDelete] is null
+{% endif %}

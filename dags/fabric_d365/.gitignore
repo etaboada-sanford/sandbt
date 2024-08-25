@@ -1,5 +1,6 @@
 dbt_packages/
-target/
+target/compiled
+target/run
 logs/
 .venv/
 profiles.yml
