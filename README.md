@@ -36,7 +36,6 @@ The folders are arranged as:
             \_ d365_tables.yml (configuration files containing the list of D365 FNO tables for reporting)
             \_ dbt_project.yml (dbt project file)
             \_ packages.yml (sandbt project package dependencies)
-         \_ developer_setup.sh (dbt project for D365 FNO)
          \_ requirements.txt (pip install requirements file)
       \_ [plugins] (Apache Airflow plugins folder)
       \_ developer_setup.sh (Shell script to setup developer project environment)
