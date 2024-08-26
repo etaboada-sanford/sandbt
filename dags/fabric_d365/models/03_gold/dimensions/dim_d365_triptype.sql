@@ -19,5 +19,5 @@ select
     , null as [IsDelete]
     , 0 as versionnumber
     , 0 as sysrowversion
-from {{source('mserp', 'dxc_triptype')}} dt
+from {{ source('mserp', 'dxc_triptype') }} as dt
 where dt.[IsDelete] is null

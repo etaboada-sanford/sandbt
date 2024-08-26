@@ -20,7 +20,7 @@ select
     , attr.sysrowversion
 from {{ source('fno', 'pdsbatchattributes') }} as attr
 inner join {{ source('fno', 'pdsbatchattrib') }} as b on attr.pdsbatchattribid = b.pdsbatchattribid and b.[IsDelete] is null and upper(attr.dataareaid) = upper(b.dataareaid)
-inner join {{ source('fno', 'GlobalOptionsetMetadata') }} as e on b.pdsbatchattribtype = e.[Option] and e.[OptionSetName] = 'pdsbatchattribtype' and e.[EntityName] = 'pdsbatchattrib'
+-- cross apply stage.f_get_enum_translation('pdsbatchattrib', '1033') on b.pdsbatchattribtype = e.[Option] and e.[OptionSetName] = 'pdsbatchattribtype' and e.[EntityName] = 'pdsbatchattrib'
 {%- if is_incremental() %}
     where attr.sysrowversion > {{ get_max_sysrowversion() }}
 {%- else %}

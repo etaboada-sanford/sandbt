@@ -9,14 +9,14 @@ with ctitemcat as (
         , rank() over (partition by x.item_cat_recid order by x.itemcategory_dataareaid) as rnkrec
     from (
         select
-            pcat.recid as item_cat_recid
+            i.[Id]
+            , pcat.recid as item_cat_recid
             , i.recid as item_recid
             , i.product
             , i.itemid
             , pt.name as item_name
-            , enum.[LocalizedLabel] as producttype
+            , {{ translate_enum('enum', 'p.producttype' ) }} as producttype
             , i.partition
-            , i.[Id]
             , i.[SinkModifiedOn]
             , cat.category_hierarchy as item_category
             , cat.category_path_level_1 as category_l_1
@@ -34,25 +34,11 @@ with ctitemcat as (
             , i.versionnumber
             , i.sysrowversion
         from {{ source('fno', 'inventtable') }} as i
-        inner join
-            {{ source('fno', 'ecoresproduct') }}
-                as p
-            on i.product = p.recid
-                and p.[IsDelete] is null
-        left join
-            {{ source('fno', 'ecoresproducttranslation') }}
-                as pt
-            on i.product = pt.recid
-                and pt.[IsDelete] is null
-                and pt.languageid = 'en-NZ'
-        inner join
-            {{ source('fno', 'ecoresproductcategory') }}
-                as pcat
-            on p.recid = pcat.product
-                and pcat.[IsDelete] is null
+        inner join {{ source('fno', 'ecoresproduct') }} as p on i.product = p.recid and p.[IsDelete] is null
+        left join {{ source('fno', 'ecoresproducttranslation') }} as pt on i.product = pt.recid and pt.[IsDelete] is null and pt.languageid = 'en-NZ'
+        inner join {{ source('fno', 'ecoresproductcategory') }} as pcat on p.recid = pcat.product and pcat.[IsDelete] is null
         inner join {{ ref('dim_d365_category') }} as cat on pcat.category = cat.category_recid
-        left join {{ source('fno', 'GlobalOptionsetMetadata') }} as enum
-            on p.producttype = enum.[Option] and enum.[OptionSetName] = 'producttype'
+        cross apply stage.f_get_enum_translation('ecoresproduct', '1033') as enum
         {%- if is_incremental() %}
             where i.sysrowversion > {{ get_max_sysrowversion() }}
         {%- else %}
@@ -64,7 +50,7 @@ with ctitemcat as (
 
 select
     {{ dbt_utils.generate_surrogate_key(['cast(concat(cast(item_cat_recid as varchar),rnkrec) as bigint)']) }} as dim_d365_itemcategory_sk
-    , convert(bigint, concat(convert(varchar, item_cat_recid), rnkrec)) as item_cat_recid_key
+    , cast(concat(cast(item_cat_recid as varchar), rnkrec) as bigint) as item_cat_recid_key
     , itemid
     , item_name
     , producttype
@@ -81,7 +67,7 @@ select
     , itemcategory_dataareaid
     , item_recid
     , category_recid
-    , partition
+    , [partition]
     , [IsDelete]
     , versionnumber
     , sysrowversion

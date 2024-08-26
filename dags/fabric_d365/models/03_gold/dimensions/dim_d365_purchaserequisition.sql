@@ -16,19 +16,20 @@ select
     , p.name as originator
 
     , pt.purchreqtype as purchreqtypeid
+    , {{ translate_enum('eprt', 'pt.purchreqtype' ) }} as purchreqtype
 
-    , eprt.[LocalizedLabel] as purchreqtype
     , pt.requisitionpurpose as requisitionpurposeid
-    , eprp.[LocalizedLabel] as requisitionpurpose
+    , {{ translate_enum('eprp', 'pt.requisitionpurpose' ) }} as requisitionpurpose
 
     , pt.requisitionstatus as requisitionstatusid
-    , eprs.[LocalizedLabel] as requisitionstatus
+    , {{ translate_enum('eprs', 'pt.requisitionstatus' ) }} as requisitionstatus
+
     , pt.projid
     , pt.partition
-    , convert(date, pt.requireddate) as requesteddate
-    , convert(date, pt.transdate) as accountingdate
+    , cast(pt.requireddate as date) as requesteddate
+    , cast(pt.transdate as date) as accountingdate
 
-    , case when convert(date, pt.submitteddatetime) = '1900-01-01' then null else pt.submitteddatetime end as submitteddatetime
+    , case when cast(pt.submitteddatetime as date) = '1900-01-01' then null else pt.submitteddatetime end as submitteddatetime
     , upper(co.dataarea) as buyinglegalentity_dataareaid
     , pt.versionnumber
     , pt.sysrowversion
@@ -36,20 +37,9 @@ select
 from {{ source('fno', 'purchreqtable') }} as pt
 cross apply dbo.f_convert_utc_to_nzt(pt.submitteddatetime) as sdat
 
-left join {{ source('fno', 'GlobalOptionsetMetadata') }} as eprt
-    on pt.purchreqtype = eprt.[Option]
-        and eprt.[OptionSetName] = 'purchreqtype'
-        and eprt.[EntityName] = 'purchreqtable'
-
-left join {{ source('fno', 'GlobalOptionsetMetadata') }} as eprp
-    on pt.requisitionpurpose = eprp.[Option]
-        and eprp.[OptionSetName] = 'requisitionpurpose'
-        and eprp.[EntityName] = 'purchreqtable'
-
-left join {{ source('fno', 'GlobalOptionsetMetadata') }} as eprs
-    on pt.requisitionstatus = eprs.[Option]
-        and eprs.[OptionSetName] = 'requisitionstatus'
-        and eprs.[EntityName] = 'purchreqtable'
+cross apply stage.f_get_enum_translation('purchreqtable', '1033') as eprt
+cross apply stage.f_get_enum_translation('purchreqtable', '1033') as eprp
+cross apply stage.f_get_enum_translation('purchreqtable', '1033') as eprs
 
 left join {{ source('fno', 'companyinfo') }} as co on pt.companyinfodefault = co.recid
 left join {{ source('fno', 'hcmworker') }} as h on pt.originator = h.recid

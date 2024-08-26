@@ -11,12 +11,12 @@ select
     , whs.inventstatusblocking
     , whs.partition
     , whs.[IsDelete]
-    , upper(whs.dataareaid) as whsinventstatus_dataareaid
     , whs.versionnumber
     , whs.sysrowversion
+    , upper(whs.dataareaid) as whsinventstatus_dataareaid
 from {{ source('fno', 'whsinventstatus') }} as whs
 {%- if is_incremental() %}
     where whs.sysrowversion > {{ get_max_sysrowversion() }}
-{% else %}
+{%- else %}
     where  whs.[IsDelete] is null
 {% endif %}

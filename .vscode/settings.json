@@ -51,7 +51,7 @@
     /* DBT setup requires these settings to lint and format the document. */
     "sqlfluff.executablePath": "${workspaceFolder}/.venv/Scripts/sqlfluff.exe",
     "sqlfluff.linter.run": "onSave",
-    "sqlfluff.experimental.format.executeInTerminal": false,
+    "sqlfluff.experimental.format.executeInTerminal": true,
     "sqlfluff.dbtInterface.enabled": false,
     "sqlfluff.format.languages": [
         "sql",
@@ -73,7 +73,9 @@
         "L009",
         "AM06: ambiguous.column_references",
         "RF06: references.quoting",
-        "CP02: capitalisation.identifiers"
+        "CP02: capitalisation.identifiers",
+        "ST06: structure.column_order",
+        "ST06"
     ],
     "sqlfluff.ignoreLocalConfig": false,
     "sqlfluff.ignoreParsing": false,

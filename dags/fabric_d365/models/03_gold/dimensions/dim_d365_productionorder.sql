@@ -10,8 +10,9 @@ select
     , pt.dxc_parentprodid as parentprodid
     , pt.prodpoolid
     , eppt.[LocalizedLabel] as prodpostingtype
-    , eps.[LocalizedLabel] as prodstatus
-    , epbs.[LocalizedLabel] as backorderstatus
+    , {{ translate_enum('eppt', 'pt.prodpostingtype' ) }} as prodpostingtype
+    , {{ translate_enum('eps', 'pt.prodstatus' ) }} as prodstatus
+    , {{ translate_enum('epbs', 'pt.backorderstatus' ) }} as backorderstatus
     , pt.dxc_salesid as salesid
     , pt.dxc_salesinventtransid as salesinventtransid
     , sl.qtyordered as salesline_qtyordered
@@ -68,30 +69,22 @@ left join
         and sl.[IsDelete] is null
 
 /* ProdStatus -> ProdStatus */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as eps
+cross apply stage.f_get_enum_translation('prodtable', '1033') as eps
     on eps.[OptionSetName] = 'prodstatus'
         and pt.prodstatus = eps.[Option]
         and eps.[EntityName] = 'prodtable'
 /* backorderstatus -> ProdBackStatus */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as epbs
+cross apply stage.f_get_enum_translation('prodtable', '1033') as epbs
     on epbs.[OptionSetName] = 'backorderstatus'
         and pt.backorderstatus = epbs.[Option]
         and epbs.[EntityName] = 'prodtable'
 /* ProdPostingType -> ProdPostingType */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as eppt
+cross apply stage.f_get_enum_translation('prodtable', '1033') as eppt
     on eppt.[OptionSetName] = 'prodpostingtype'
         and pt.prodpostingtype = eppt.[Option]
         and eppt.[EntityName] = 'prodtable'
 /* InventRefType -> InventRefType */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as eirt
+cross apply stage.f_get_enum_translation('prodtable', '1033') as eirt
     on eirt.[OptionSetName] = 'inventreftype'
         and pt.inventreftype = eirt.[Option]
         and eirt.[EntityName] = 'prodtable'

@@ -18,10 +18,11 @@ select
     , w.versionnumber
     , w.sysrowversion
 from {{ source('fno', 'hcmworker') }} as w
-inner join {{ ref('dim_d365_party') }} as pt on w.person = pt.party_recid
-    and pt.[IsDelete] is null
+inner join {{ ref('dim_d365_party') }} as pt
+    on w.person = pt.party_recid
+        and pt.[IsDelete] is null
 {%- if is_incremental() %}
     where w.sysrowversion > {{ get_max_sysrowversion() }}
-{% else %}
+{%- else %}
     where  w.[IsDelete] is null
 {% endif %}

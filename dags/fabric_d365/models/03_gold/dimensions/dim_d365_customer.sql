@@ -123,8 +123,4 @@ select
     , pcu.name as parent_customer_name
     , cu.invoiceaccount as parent_customer_account
 from custfinal as cu
-left join
-    custfinal as pcu
-    on
-        cu.invoiceaccount = pcu.accountnum
-        and cu.customer_dataareaid = pcu.customer_dataareaid
+left join custfinal as pcu on cu.invoiceaccount = pcu.accountnum and cu.customer_dataareaid = pcu.customer_dataareaid

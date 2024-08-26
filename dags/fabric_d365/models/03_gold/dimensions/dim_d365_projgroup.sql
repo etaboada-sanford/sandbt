@@ -8,7 +8,7 @@ select
     , pr.recid
     , pr.projgroupid
     , pr.name
-    , eprt.[LocalizedLabel] as projgrouptype
+    , {{ translate_enum('eprt', 'pr.projgrouptype' ) }} as projgrouptype
     , pr.costtranscost
     , pr.empltranscost
     , pr.invoiceposting
@@ -26,9 +26,7 @@ select
     , pr.sysrowversion
 
 from {{ source('fno', 'projgroup') }} as pr
-left join {{ source('fno', 'GlobalOptionsetMetadata') }} as eprt on eprt.[OptionSetName] = 'projtype'
-    and pr.projtype = eprt.[Option]
-    and eprt.[EntityName] = 'projgroup'
+cross apply stage.f_get_enum_translation('projgroup', '1033') as eprt
 {%- if is_incremental() %}
     where pr.sysrowversion > {{ get_max_sysrowversion() }}
 {%- else %}

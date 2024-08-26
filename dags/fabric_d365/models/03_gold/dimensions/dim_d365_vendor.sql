@@ -23,7 +23,7 @@ select
     , v.currency
     , v.partition
     , v.blocked as blockedid
-    , eb.[LocalizedLabel]
+    , {{ translate_enum('eb', 'v.blocked' ) }} as blocked
     , v.dxc_lfrnumber as lfrnumber
     , v.dxc_quotapermitcode as quotapermitcode
     , v.dxc_licencegroupid as licencegroupid
@@ -40,17 +40,12 @@ select
     , lpa.zipcode as primary_address_postcode
     , lpa.countryregionid as primary_address_countrycode
     , v.[IsDelete]
-    , upper(
-        v.dataareaid
-    ) as vendor_dataareaid
+    , upper(v.dataareaid) as vendor_dataareaid
     , nullif(v.blockedreleasedate, '1900-01-01') as blockedreleasedate
-    , convert(date, v.createddatetime) as createddate
+    , cast(v.createddatetime as date) as createddate
     , trim(
         case
-            when right(
-                    lpa.address
-                    , 2
-                ) = '%1' then left(lpa.address, len(lpa.address) - 2)
+            when right(lpa.address, 2) = '%1' then left(lpa.address, len(lpa.address) - 2)
             else lpa.address
         end
     ) as primary_address
@@ -60,7 +55,7 @@ from {{ source('fno', 'vendtable') }} as v
 left join {{ source('fno', 'vw_dirpartytable') }} as p on v.party = p.recid and p.[IsDelete] is null
 left join {{ source('fno', 'logisticslocation') }} as ll on p.primaryaddresslocation = ll.recid
 left join {{ source('fno', 'logisticspostaladdress') }} as lpa on ll.recid = lpa.location and getdate() between lpa.validfrom and lpa.validto
-left join {{ source('fno', 'GlobalOptionsetMetadata') }} as eb on eb.[OptionSetName] = 'blocked' and eb.[EntityName] = 'vendtable' and v.blocked = eb.[Option]
+cross apply stage.f_get_enum_translation('vendtable', '1033') as eb
 left join {{ ref('stg_d365_lea_contact_poconfirm') }} as email_po on v.party = email_po.party_recid
 left join {{ ref('stg_d365_lea_contact_invoice') }} as email_invoice on v.party = email_invoice.party_recid
 left join {{ ref('stg_d365_lea_contact_remitto') }} as email_remit on v.party = email_remit.party_recid

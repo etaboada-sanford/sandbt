@@ -22,8 +22,8 @@ select
     , st.defaultinventstatusid
     , st.dxc_defaultdimension
     , il.dxc_manufacturerid as manufacturerid
-    , ewt.[LocalizedLabel] as warehousetype
-    , eot.[LocalizedLabel] as operationstype
+    , {{ translate_enum('ewt', 'il.dxc_edecwarehousetype' ) }} as warehousetype
+    , {{ translate_enum('eot', 'il.dxc_operationstype' ) }} as operationstype
 
     , case when il.dxc_edecwarehousetype in (2, 3) then 1 else 0 end as is_vessel /* ('EDECWHType_DW_VESSEL' ,'EDECWHType_LP_VESSEL')*/
 
@@ -42,18 +42,8 @@ select
     , il.sysrowversion
 from {{ source('fno', 'inventlocation') }} as il
 left join {{ source('fno', 'inventsite') }} as st on il.inventsiteid = st.siteid and upper(il.dataareaid) = upper(st.dataareaid) and st.[IsDelete] is null
-
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as eot
-    on eot.[OptionSetName] = 'dxc_operationstype'
-        and il.dxc_operationstype = eot.[Option]
-
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as ewt
-    on ewt.[OptionSetName] = 'dxc_edecwarehousetype'
-        and il.dxc_edecwarehousetype = ewt.[Option]
+cross apply stage.f_get_enum_translation('inventlocation', '1033') as eot
+cross apply stage.f_get_enum_translation('inventlocation', '1033') as ewt
 
 {%- if is_incremental() %}
     where il.sysrowversion > {{ get_max_sysrowversion() }}

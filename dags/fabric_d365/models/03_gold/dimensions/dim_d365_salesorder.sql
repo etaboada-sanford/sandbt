@@ -31,26 +31,24 @@ with d365_sales as (
         , so.salesname
 
         , so.salespoolid
+
         , so.salesstatus as salesstatusid
+        , {{ translate_enum('ests', 'so.salesstatus' ) }} as salesstatus
 
-        , ests.[LocalizedLabel]
-            as salesstatus
         , so.salestype as salestypeid
+        , {{ translate_enum('est', 'so.salestype' ) }} as salestype
 
-        , est.[LocalizedLabel]
-            as salestype
         , so.taxgroup
-
         , so.url
         , so.phone
 
         , so.dxc_placeofdelivery as placeofdelivery
-        , so.dxc_deliveryzone
-            as deliveryzone
-        , e.[LocalizedLabel] as documentstatus
+        , so.dxc_deliveryzone as deliveryzone
+
+        , {{ translate_enum('e', 'so.documentstatus' ) }} as documentstatus
+
         , wst.worker_name as employee_sales_taker
-        , wsr.worker_name
-            as employee_sales_responsible
+        , wsr.worker_name as employee_sales_responsible
         , so.dxc_destinationlocationcode as destinationlocationcode
         , prt.port_desc
         , prt.country_code
@@ -76,8 +74,8 @@ with d365_sales as (
         , upper(
             si.dataareaid
         ) as site_dataareaid
-        , convert(date, case when convert(date, so.deliverydate) = '1900-01-01' then null else so.deliverydate end) as deliverydate
-        , convert(date, case when convert(date, so.dxc_orderpackdate) = '1900-01-01' then null else so.dxc_orderpackdate end) as orderpackdate
+        , cast(case when cast(so.deliverydate as date) = '1900-01-01' then null else so.deliverydate end as date) as deliverydate
+        , cast(case when cast(so.dxc_orderpackdate as date) = '1900-01-01' then null else so.dxc_orderpackdate end as date) as orderpackdate
 
         /* reformatted for ease of reading...
                                 case
@@ -110,18 +108,14 @@ with d365_sales as (
                                 else ctsu.rs_freight_by_tl
                                 end local_freight,
                                 */
-        , convert(date, case when convert(date, so.dxc_requestedfinaldestinationdate) = '1900-01-01' then null else so.dxc_requestedfinaldestinationdate end) as requestedfinaldestinationdate
-        , convert(date, case when convert(date, so.dxc_invoicedate) = '1900-01-01' then null else so.dxc_invoicedate end) as invoicedate
-        , convert(date, case
-            when convert(date, so.shippingdateconfirmed) != '1900-01-01' then convert(date, so.shippingdateconfirmed)
-            when convert(date, so.shippingdaterequested) != '1900-01-01' then convert(date, so.shippingdaterequested)
-        end) as shippingdate
-        , convert(
-            date, case when convert(date, so.dxc_requestedloadportdate) = '1900-01-01' then null else so.dxc_requestedloadportdate end
-        ) as requestedloadportdate
-        , convert(
-            date, case when so.createddatetime = '1900-01-01 00:00:00.000' then null else createdate.newzealandtime end
-        ) as createdate
+        , cast(case when cast(so.dxc_requestedfinaldestinationdate as date) = '1900-01-01' then null else so.dxc_requestedfinaldestinationdate end as date) as requestedfinaldestinationdate
+        , cast(case when cast(so.dxc_invoicedate as date) = '1900-01-01' then null else so.dxc_invoicedate end as date) as invoicedate
+        , cast(case
+            when cast(so.shippingdateconfirmed as date) != '1900-01-01' then cast(so.shippingdateconfirmed as date)
+            when cast(so.shippingdaterequested as date) != '1900-01-01' then cast(so.shippingdaterequested as date)
+        end as date) as shippingdate
+        , cast(case when cast(so.dxc_requestedloadportdate as date) = '1900-01-01' then null else so.dxc_requestedloadportdate end as date) as requestedloadportdate
+        , cast(case when so.createddatetime = '1900-01-01 00:00:00.000' then null else createdate.newzealandtime end as date) as createdate
         , case
             when ctsu.s_freight_by_ocean = 1 or ctsu.rs_freight_by_ocean = 1 or ctsu.l_freight_by_ocean = 1 or ctsu.cs_freight_by_ocean = 1 then 1
             when so.dlvmode = 'TBC-EXPORT' then 1
@@ -150,8 +144,9 @@ with d365_sales as (
     left join {{ source('fno', 'inventlocation') }} as l on so.inventlocationid = l.inventlocationid and upper(so.dataareaid) = upper(l.dataareaid) and so.[IsDelete] is null
     left join {{ source('fno', 'inventsite') }} as si on so.inventsiteid = si.siteid and upper(si.dataareaid) = upper(l.dataareaid) and so.[IsDelete] is null
 
-    left join {{ source('fno', 'GlobalOptionsetMetadata') }} as est on lower(est.[OptionSetName]) = 'salestype' and so.salestype = est.[Option] and est.[EntityName] = 'salestable' and so.[IsDelete] is null
-    left join {{ source('fno', 'GlobalOptionsetMetadata') }} as ests on lower(ests.[OptionSetName]) = 'salesstatus' and so.salesstatus = ests.[Option] and ests.[EntityName] = 'salestable' and so.[IsDelete] is null
+    cross apply stage.f_get_enum_translation('salestable', '1033') as est
+    cross apply stage.f_get_enum_translation('salestable', '1033') as ests
+    cross apply stage.f_get_enum_translation('salestable', '1033') as e
 
     left join {{ source('fno', 'dlvmode') }} as d on so.dlvmode = d.code and upper(so.dataareaid) = upper(d.dataareaid) and d.[IsDelete] is null
 
@@ -159,7 +154,6 @@ with d365_sales as (
 
     left join {{ ref('dim_d365_worker') }} as wst on so.workersalestaker = wst.worker_recid
     left join {{ ref('dim_d365_worker') }} as wsr on so.workersalesresponsible = wsr.worker_recid
-    left join {{ source('fno', 'GlobalOptionsetMetadata') }} as e on lower(e.[OptionSetName]) = 'documentstatus' and so.documentstatus = e.[Option] and est.[EntityName] = 'salestable'
 
     left join {{ ref('dim_d365_port') }} as prt on so.dxc_destinationlocationcode = prt.portid and prt.port_dataareaid = upper(so.dataareaid)
     cross apply dbo.f_convert_utc_to_nzt(so.createddatetime) as createdate
@@ -320,7 +314,7 @@ select
     , null as country_isocode
     , null as port_country_name
     , null as continent
-    , 5637144576 as partition
+    , 5637144576 as [partition]
     , null as [IsDelete]
     , 0 as versionnumber
     , 0 as sysrowversion

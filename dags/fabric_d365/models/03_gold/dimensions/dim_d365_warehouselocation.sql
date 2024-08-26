@@ -22,9 +22,9 @@ with ctw as (
         , whl.level
         , whl.partition
         , whl.[IsDelete]
-        , upper(whl.dataareaid) as warehouselocation_dataareaid
         , whl.versionnumber
         , whl.sysrowversion
+        , upper(whl.dataareaid) as warehouselocation_dataareaid
     from {{ source('fno', 'wmslocation') }} as whl
     {%- if is_incremental() %}
         where whl.sysrowversion > {{ get_max_sysrowversion() }}
