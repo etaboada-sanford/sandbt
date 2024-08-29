@@ -68,23 +68,23 @@ with trip_d365 as (
 
 , trip_nav as (
     select
-        nav_trip."dim_fishing_trip_key" as dim_fishing_trip_key
-        , nav_trip."fishing_trip_no" as fishing_trip_no
-        , convert(date, nav_trip."landing_date") as landingdate
-        , convert(date, nav_trip."starting_date_of_trip") as actualstartdate
-        , convert(date, nav_trip."end_date_of_trip") as actualenddate
+        nav_trip.dim_fishing_trip_key
+        , nav_trip.fishing_trip_no
+        , convert(date, nav_trip.landing_date) as landingdate
+        , convert(date, nav_trip.starting_date_of_trip) as actualstartdate
+        , convert(date, nav_trip.end_date_of_trip) as actualenddate
 
     from {{ source('nav', 'dim_fishing_trip') }} as nav_trip
     where nav_trip.is_deleted = 0
         and exists (
-            select 1 from {{ ref('dim_d365_inventbatch') }} as ib
+            select 1 as val from {{ ref('dim_d365_inventbatch') }} as ib
             where ib.inventbatch_dataareaid = 'SANF'
-                and nav_trip."fishing_trip_no" = ib.tripno
+                and nav_trip.fishing_trip_no = ib.tripno
                 and ib.tripno != ''
         )
         and not exists (
-            select 1 from trip_d365
-            where nav_trip."fishing_trip_no" = trip_d365.tripid
+            select 1 as val from trip_d365
+            where nav_trip.fishing_trip_no = trip_d365.tripid
         )
 )
 

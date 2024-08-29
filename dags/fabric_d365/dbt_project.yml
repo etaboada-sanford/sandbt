@@ -43,3 +43,13 @@ seeds:
     03_gold:
       +database: dwh_sanford
       +schema: dw
+
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['tsql_utils', 'dbt_utils', 'sandbt']
+  - macro_namespace: dbt_date
+    search_order: ['tsql_utils', 'dbt_date', 'sandbt']
+  - macro_namespace: dbt_expectations
+    search_order: ['tsql_utils', 'dbt_expectations']
+  - macro_namespace: audit_helper
+    search_order: ['tsql_utils', 'audit_helper']

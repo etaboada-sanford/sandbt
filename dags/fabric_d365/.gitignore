@@ -3,5 +3,4 @@ target/compiled
 target/run
 logs/
 .venv/
-profiles.yml
 .trunk/
