@@ -1,0 +1,6 @@
+models:
+  - name: dim_d365_address
+    tests:
+      - dbt_expectations.expect_table_column_count_to_be_between:
+          min_value: 1 # (Optional)
+          max_value: 4 # (Optional)
