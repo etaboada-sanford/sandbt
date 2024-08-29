@@ -23,38 +23,33 @@ snapshot-paths: [snapshots]
 clean-targets:         # directories to be removed by `dbt clean`
   - target
 
-vars:
-    dbt_date:time_zone: Pacific/Auckland
-
-# Configuring models
-# Full documentation: https://docs.getdbt.com/docs/configuring-models
-
-# In this example config, we tell dbt to build all models in the example/
-# directory as views. These settings can be overridden in the individual model
-# files using the `{{ config(...) }}` macro.
 models:
   d365:
     01_bronze:
     02_silver:
-      +database: sanford_dw
+      +database: dwh_sanford
       +schema: stage
       +materialized: table
     03_gold:
-      +database: sanford_dw
-      dimensions:
-        +schema: dw
-        +materialized: table
-      facts:
-        +schema: dw
-        +materialized: table
+      +database: dwh_sanford
+      +schema: dw
+      +materialized: table
 
 seeds:
   d365:
+    02_silver:
+      +database: dwh_sanford
+      +schema: stage
     03_gold:
-      +database: sanford_dw
-      dimensions:
-        +schema: dw
-      facts:
-        +schema: dw
-      intermediaries:
-        +schema: int
+      +database: dwh_sanford
+      +schema: dw
+
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['tsql_utils', 'dbt_utils', 'sandbt']
+  - macro_namespace: dbt_date
+    search_order: ['tsql_utils', 'dbt_date', 'sandbt']
+  - macro_namespace: dbt_expectations
+    search_order: ['tsql_utils', 'dbt_expectations']
+  - macro_namespace: audit_helper
+    search_order: ['tsql_utils', 'audit_helper']

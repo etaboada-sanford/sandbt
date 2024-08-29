@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_enum_sk']
+) }}
+
 select
     {{ dbt_utils.generate_surrogate_key(['[OptionSetName]','[ExternalValue]','[LocalizedLabel]','[Option]']) }} as dim_d365_enum_sk
     , [EntityName]

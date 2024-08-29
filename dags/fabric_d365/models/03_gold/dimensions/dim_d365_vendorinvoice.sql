@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_vendorinvoice_sk']
+) }}
+
 select
     j.[Id] as dim_d365_vendorinvoice_sk
 
@@ -30,22 +35,24 @@ select
     , j.purchid
     , j.purchasetype as purchasetypeid
 
-    , ept.[LocalizedLabel] as purchasetype
+    , {{ translate_enum('ept', 'j.purchasetype' ) }} as purchasetype
     , j.qty
     , j.salesbalance
     , upper(j.dataareaid) as vendorinvoice_dataareaid
 
-    , convert(date, j.invoicedate) as invoicedate
-    , convert(date, j.deliverydate_es) as deliverydate_es
-    , convert(date, j.documentdate) as documentdate
-    , convert(date, j.duedate) as duedate
-    , convert(date, j.fixedduedate) as fixedduedate
-    , case when convert(date, j.receiveddate) = '1900-01-01' then null else convert(date, j.receiveddate) end as receiveddate
+    , cast(j.invoicedate as date) as invoicedate
+    , cast(j.deliverydate_es as date) as deliverydate_es
+    , cast(j.documentdate as date) as documentdate
+    , cast(j.duedate as date) as duedate
+    , cast(j.fixedduedate as date) as fixedduedate
+    , case when cast(j.receiveddate as date) = '1900-01-01' then null else cast(j.receiveddate as date) end as receiveddate
     , upper(j.intercompanycompanyid) as intercompanycompanyid
+    , j.versionnumber
+    , j.sysrowversion
 from {{ source('fno', 'vendinvoicejour') }} as j
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as ept
-    on lower(ept.[OptionSetName]) = lower('purchasetype')
-        and j.purchasetype = ept.[Option]
-where j.[IsDelete] is null
+cross apply stage.f_get_enum_translation('vendinvoicejour', '1033') as ept
+{%- if is_incremental() %}
+    where j.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where  j.[IsDelete] is null
+{% endif %}

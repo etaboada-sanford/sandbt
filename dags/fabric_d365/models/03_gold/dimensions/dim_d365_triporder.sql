@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_triporder_sk']
+) }}
+
 /* Trips were not migrated from NAV, but we have SoH & Production in D365 for non-existant trips, so Prod Vol reporting does not assign Trip
     add in NAV trips where D365 batch references NAV Trip, that is not in D365
 */
@@ -44,6 +49,8 @@ with trip_d365 as (
 
         , flc.mserp_vendor1percent / 100 as vendor1percent
         , upper(dto.mserp_dataareaid) as triporder_dataareaid
+        , 0 as versionnumber
+        , 0 as sysrowversion
     from {{ source('mserp', 'dxc_triporder') }} as dto
     left join {{ ref('dim_d365_vendor') }} as v on dto.mserp_vendaccount = v.accountnum and upper(dto.mserp_dataareaid) = v.vendor_dataareaid
     left join {{ source('mserp', 'dxc_farmlinecage') }} as flc
@@ -52,28 +59,32 @@ with trip_d365 as (
             and upper(dto.mserp_farmlinecageid) = upper(flc.mserp_farmlinecageid)
             and dto.mserp_catchharvestareaid = flc.mserp_catchharvestareaid
             and flc.[IsDelete] is null
-    where dto.[IsDelete] is null
+    {%- if is_incremental() %}
+        where dto.sysrowversion > {{ get_max_sysrowversion() }}
+    {%- else %}
+        where dto.[IsDelete] is null
+    {% endif %}
 )
 
 , trip_nav as (
     select
-        nav_trip."dim_fishing_trip_key" as dim_fishing_trip_key
-        , nav_trip."fishing_trip_no" as fishing_trip_no
-        , convert(date, nav_trip."landing_date") as landingdate
-        , convert(date, nav_trip."starting_date_of_trip") as actualstartdate
-        , convert(date, nav_trip."end_date_of_trip") as actualenddate
+        nav_trip.dim_fishing_trip_key
+        , nav_trip.fishing_trip_no
+        , convert(date, nav_trip.landing_date) as landingdate
+        , convert(date, nav_trip.starting_date_of_trip) as actualstartdate
+        , convert(date, nav_trip.end_date_of_trip) as actualenddate
 
     from {{ source('nav', 'dim_fishing_trip') }} as nav_trip
     where nav_trip.is_deleted = 0
         and exists (
-            select 1 from {{ ref('dim_d365_inventbatch') }} as ib
+            select 1 as val from {{ ref('dim_d365_inventbatch') }} as ib
             where ib.inventbatch_dataareaid = 'SANF'
-                and nav_trip."fishing_trip_no" = ib.tripno
+                and nav_trip.fishing_trip_no = ib.tripno
                 and ib.tripno != ''
         )
         and not exists (
-            select 1 from trip_d365
-            where nav_trip."fishing_trip_no" = trip_d365.tripid
+            select 1 as val from trip_d365
+            where nav_trip.fishing_trip_no = trip_d365.tripid
         )
 )
 
@@ -122,6 +133,8 @@ select
     , null as inventsiteid
     , null as inventlocationid
 
-    , 0 as isdelete
     , 'SANF' as triporder_dataareaid
+    , null as [IsDelete]
+    , 0 as versionnumber
+    , 0 as sysrowversion
 from trip_nav

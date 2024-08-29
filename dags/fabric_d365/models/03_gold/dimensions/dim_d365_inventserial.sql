@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_inventserial_sk']
+) }}
+
 select
     sr.[Id] as dim_d365_inventserial_sk
     , sr.recid as inventserial_recid
@@ -14,9 +19,11 @@ select
     /* custom Antarctic Toothfish categories against the SR \ whole fish being caught */
     , sr.rfidtagid
     , sr.[IsDelete]
+    , sr.versionnumber
+    , sr.sysrowversion
+    /* --count of 'pieces of fish' in a 'box' at the SN# level, Used in the detailed Transport Loadout Report and so will be needed for SC reports */
     , upper(sr.inventserialid) as inventserialid
     , case when convert(date, sr.proddate) = '1900-01-01' then null else convert(date, sr.proddate) end as proddate
-    /* --count of 'pieces of fish' in a 'box' at the SN# level, Used in the detailed Transport Loadout Report and so will be needed for SC reports */
     , upper(sr.dataareaid) as inventserial_dataareaid
     , case when i.speciescode in ('ATO', 'PTO')
             then
@@ -41,4 +48,8 @@ select
     , case when i.speciescode in ('ATO', 'PTO') then 1 else sr.dxc_pieces end as pieces
 from {{ source('fno', 'inventserial') }} as sr
 left join {{ ref('dim_d365_item') }} as i on sr.itemid = i.itemid and upper(sr.dataareaid) = i.item_dataareaid
-where sr.[IsDelete] is null
+{%- if is_incremental() %}
+    where sr.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where sr.[IsDelete] is null
+{% endif %}

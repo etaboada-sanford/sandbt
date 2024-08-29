@@ -1,11 +1,22 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_addresscontactrole_sk']
+) }}
+
 select
-    [Id] as dim_d365_addresscontactrole_sk
-    , recid as addresscontactrole_recid
-    , iscontactinfo
-    , ispostaladdress
-    , name as addresscontactrole_name
-    , type as addresscontactrole_type
-    , partition
-    , [IsDelete]
-from {{ source('fno', 'logisticslocationrole') }}
-where [IsDelete] is null
+    ll.[Id] as dim_d365_addresscontactrole_sk
+    , ll.recid as addresscontactrole_recid
+    , ll.iscontactinfo
+    , ll.ispostaladdress
+    , ll.name as addresscontactrole_name
+    , ll.type as addresscontactrole_type
+    , ll.partition
+    , ll.[IsDelete]
+    , ll.versionnumber
+    , ll.sysrowversion
+from {{ source('fno', 'logisticslocationrole') }} as ll
+{%- if is_incremental() %}
+    where ll.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where ll.[IsDelete] is null
+{% endif %}

@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_project_sk']
+) }}
+
 select
     pr.[Id] as dim_d365_project_sk
     , pr.recid as project_recid
@@ -23,7 +28,7 @@ select
     , null as sortingid
     , null as sortingid2_
     , null as sortingid3_
-    , e.[LocalizedLabel] as project_status
+    , {{ translate_enum('e', 'pr.status' ) }} as project_status
     , pr.taxgroupid
     , pr.type
     , pr.validateprojcategory
@@ -56,22 +61,28 @@ select
     , pr.dxc_musselmetreseeded2 as musselmetreseeded2
     , pr.partition
     , pr.[IsDelete]
-    , case when convert(date, pr.created) = '1900-01-01' then null else convert(date, pr.created) end as created
+    , case when cast(pr.created as date) = '1900-01-01' then null else cast(pr.created as date) end as created
     , concat(pr.projid, ' - ', pr.name) as proj_desc
-    , case when convert(date, pr.startdate) = '1900-01-01' then null else convert(date, pr.startdate) end as startdate
-    , case when convert(date, pr.projectedstartdate) = '1900-01-01' then null else convert(date, pr.projectedstartdate) end as projectedstartdate
-    , case when convert(date, pr.projectedenddate) = '1900-01-01' then null else convert(date, pr.projectedenddate) end as projectedenddate
-    , case when convert(date, pr.psaschedstartdate) = '1900-01-01' then null else convert(date, pr.psaschedstartdate) end as psaschedstartdate
-    , case when convert(date, pr.psaschedenddate) = '1900-01-01' then null else convert(date, pr.psaschedenddate) end as psaschedenddate
-    , convert(date, prcreateddatetime.newzealandtime) as createddatetime
-    , convert(date, prmodifieddatetime.newzealandtime) as modifieddatetime
+    , case when cast(pr.startdate as date) = '1900-01-01' then null else cast(pr.startdate as date) end as startdate
+    , case when cast(pr.projectedstartdate as date) = '1900-01-01' then null else cast(pr.projectedstartdate as date) end as projectedstartdate
+    , case when cast(pr.projectedenddate as date) = '1900-01-01' then null else cast(pr.projectedenddate as date) end as projectedenddate
+    , case when cast(pr.psaschedstartdate as date) = '1900-01-01' then null else cast(pr.psaschedstartdate as date) end as psaschedstartdate
+    , case when cast(pr.psaschedenddate as date) = '1900-01-01' then null else cast(pr.psaschedenddate as date) end as psaschedenddate
+    , cast(prcreateddatetime.newzealandtime as date) as createddatetime
+    , cast(prmodifieddatetime.newzealandtime as date) as modifieddatetime
     , upper(pr.dataareaid) as project_dataareaid
+    , pr.versionnumber
+    , pr.sysrowversion
 from {{ source('fno', 'projtable') }} as pr
-left join {{ source('fno', 'GlobalOptionsetMetadata') }} as e on e.[OptionSetName] = 'status' and pr.status = e.[Option] and e.[EntityName] = 'projtable'
-left join {{ source('fno', 'hcmworker') }} as w on convert(varchar, pr.workerresponsible) = convert(varchar, w.recid) and w.[IsDelete] is null
+cross apply stage.f_get_enum_translation('projtable', '1033') as e
+left join {{ source('fno', 'hcmworker') }} as w on cast(pr.workerresponsible as varchar) = cast(w.recid as varchar) and w.[IsDelete] is null
 left join {{ ref('dim_d365_party') }} as pt on w.person = pt.party_recid and pt.[IsDelete] is null
 left join {{ ref('dim_d365_projgroup') }} as pg on pr.projgroupid = pg.projgroupid and upper(pr.dataareaid) = pg.projgroup_dataareaid and pg.[IsDelete] is null
 left join {{ ref('dim_d365_financialdimensionvalueset') }} as fd on pr.defaultdimension = fd.financialdimensionvalueset_recid
-cross apply dbo.ConvertUtcToNzt(pr.createddatetime) as prcreateddatetime
-cross apply dbo.ConvertUtcToNzt(pr.modifieddatetime) as prmodifieddatetime
-where pr.[IsDelete] is null
+cross apply dbo.f_convert_utc_to_nzt(pr.createddatetime) as prcreateddatetime
+cross apply dbo.f_convert_utc_to_nzt(pr.modifieddatetime) as prmodifieddatetime
+{%- if is_incremental() %}
+    where pr.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where pr.[IsDelete] is null
+{% endif %}

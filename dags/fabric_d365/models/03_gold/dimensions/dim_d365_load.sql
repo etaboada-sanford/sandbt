@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_load_sk']
+) }}
+
 with ld as (
     select
         wlt.[Id] as dim_d365_load_sk
@@ -7,7 +12,7 @@ with ld as (
         , wlt.loadid
         , wlt.loadreferencenum
         , wlt.loadstatus as loadstatusid
-        , els.[LocalizedLabel] as loadstatus
+        , {{ translate_enum('els', 'wlt.loadstatus' ) }} as loadstatus
         , wlt.loadtemplateid
 
 
@@ -38,7 +43,7 @@ with ld as (
         , trans.description as transhipmentlocation
         , wlt.vesselname
         , wlt.voyagenum
-        , eld.[LocalizedLabel] as loaddirection
+        , {{ translate_enum('eld', 'wlt.loaddirection' ) }} as loaddirection
         , wlt.dxc_vesselcode as vesselcode
         , wlt.tractornumber as feeder_vessel_name
         , wlt.carnumber as feeder_voyage_number
@@ -85,81 +90,36 @@ with ld as (
         , w.name as warehouse_name
         , upper(wlt.dataareaid) as load_dataareaid
         , wlt.[IsDelete]
+        , wlt.versionnumber
+        , wlt.sysrowversion
 
     from {{ source('fno', 'whsloadtable') }} as wlt
-    left join
-        {{ source('fno', 'inventlocation') }}
-            as w
-        on wlt.inventlocationid = w.inventlocationid
-            and upper(wlt.dataareaid) = upper(w.dataareaid)
-            and w.[IsDelete] is null and wlt.[IsDelete] is null
-    left join
-        {{ source('fno', 'inventsite') }}
-            as s
-        on wlt.inventsiteid = s.siteid
-            and upper(wlt.dataareaid) = upper(s.dataareaid)
-            and s.[IsDelete] is null and wlt.[IsDelete] is null
-    left join
-        {{ source('fno', 'GlobalOptionsetMetadata') }}
-            as els
-        on lower(els.[OptionSetName]) = lower('loadstatus')
-            and wlt.loadstatus = els.[Option]
-            and wlt.[IsDelete] is null
-    left join
-        {{ source('fno', 'GlobalOptionsetMetadata') }}
-            as eld
-        on lower(eld.[OptionSetName]) = lower('loaddirection')
-            and wlt.loaddirection = eld.[Option]
-            and wlt.[IsDelete] is null
-
-    left join
-        {{ source('fno', 'whsloadtemplate') }}
-            as wt
-        on wlt.loadtemplateid = wt.loadtemplateid
-            and upper(wlt.dataareaid) = upper(wt.dataareaid)
-            and wt.[IsDelete] is null
-
-    left join
-        {{ source('fno', 'intrastatport') }}
-            as dest
-        on wlt.dxc_destinationlocationcode = dest.portid
-            and dest.[IsDelete] is null
-    left join
-        {{ source('fno', 'intrastatport') }}
-            as desp
-        on wlt.dxc_dispatchlocationcode = desp.portid
-            and desp.[IsDelete] is null
-    left join
-        {{ source('fno', 'intrastatport') }}
-            as ld
-        on wlt.dxc_loadinglocationcode = ld.portid
-            and ld.[IsDelete] is null
-    left join
-        {{ source('fno', 'intrastatport') }}
-            as disch
-        on wlt.dxc_dischargelocationcode = disch.portid
-            and disch.[IsDelete] is null
-    left join
-        {{ source('fno', 'intrastatport') }}
-            as trans
-        on wlt.dxc_transhipmentlocationcode = trans.portid
-            and trans.[IsDelete] is null
+    left join {{ source('fno', 'inventlocation') }} as w on wlt.inventlocationid = w.inventlocationid and upper(wlt.dataareaid) = upper(w.dataareaid) and w.[IsDelete] is null and wlt.[IsDelete] is null
+    left join {{ source('fno', 'inventsite') }} as s on wlt.inventsiteid = s.siteid and upper(wlt.dataareaid) = upper(s.dataareaid) and s.[IsDelete] is null and wlt.[IsDelete] is null
+    cross apply stage.f_get_enum_translation('whsloadtable', '1033') as els
+    cross apply stage.f_get_enum_translation('whsloadtable', '1033') as eld
+    left join {{ source('fno', 'whsloadtemplate') }} as wt on wlt.loadtemplateid = wt.loadtemplateid and upper(wlt.dataareaid) = upper(wt.dataareaid) and wt.[IsDelete] is null
+    left join {{ source('fno', 'intrastatport') }} as dest on wlt.dxc_destinationlocationcode = dest.portid and dest.[IsDelete] is null
+    left join {{ source('fno', 'intrastatport') }} as desp on wlt.dxc_dispatchlocationcode = desp.portid and desp.[IsDelete] is null
+    left join {{ source('fno', 'intrastatport') }} as ld on wlt.dxc_loadinglocationcode = ld.portid and ld.[IsDelete] is null
+    left join {{ source('fno', 'intrastatport') }} as disch on wlt.dxc_dischargelocationcode = disch.portid and disch.[IsDelete] is null
+    left join {{ source('fno', 'intrastatport') }} as trans on wlt.dxc_transhipmentlocationcode = trans.portid and trans.[IsDelete] is null
 
     /* To get actual SalesID */
-    left join
-        {{ source('fno', 'salestable') }}
-            as st
-        on wlt.ordernum = st.salesid
-            and upper(wlt.dataareaid) = upper(st.dataareaid)
-    cross apply dbo.ConvertUtcToNzt(wlt.eta) as wlteta
-    cross apply dbo.ConvertUtcToNzt(wlt.etd) as wltetd
-    cross apply dbo.ConvertUtcToNzt(wlt.cutoffutcdatetime) as wltcutoffutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.lastupdateutcdatetime) as wltlastupdateutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.loadarrivalutcdatetime) as wltloadarrivalutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.loadschedshiputcdatetime) as wltloadschedshiputcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.loadshipconfirmutcdatetime) as wltloadshipconfirmutcdatetime
-    cross apply dbo.ConvertUtcToNzt(wlt.sailutcdatetime) as wltsailutcdatetime
-    where wlt.[IsDelete] is null
+    left join {{ source('fno', 'salestable') }} as st on wlt.ordernum = st.salesid and upper(wlt.dataareaid) = upper(st.dataareaid)
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.eta) as wlteta
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.etd) as wltetd
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.cutoffutcdatetime) as wltcutoffutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.lastupdateutcdatetime) as wltlastupdateutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadarrivalutcdatetime) as wltloadarrivalutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadschedshiputcdatetime) as wltloadschedshiputcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.loadshipconfirmutcdatetime) as wltloadshipconfirmutcdatetime
+    cross apply {{ this.database }}.dbo.f_convert_utc_to_nzt(wlt.sailutcdatetime) as wltsailutcdatetime
+    {%- if is_incremental() %}
+        where wlt.sysrowversion > {{ get_max_sysrowversion() }}
+    {%- else %}
+        where wlt.[IsDelete] is null
+    {% endif %}
 
 )
 
@@ -242,5 +202,6 @@ select
     , warehouse_name
     , load_dataareaid
     , [IsDelete]
-
+    , versionnumber
+    , sysrowversion
 from ld

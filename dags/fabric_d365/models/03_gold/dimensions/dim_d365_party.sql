@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_party_sk']
+) }}
+
 select
     pt.[Id] as dim_d365_party_sk
     , pt.recid as party_recid
@@ -34,12 +39,17 @@ select
 
     , null as [IsDelete]
     , coalesce(vpt.orgnumber, vpt.professionalsuffix) as orgnumber
+    , pt.versionnumber
+    , pt.sysrowversion
 
 from {{ source('fno', 'dirpartytable') }} as pt
-join {{ source('fno', 'vw_dirpartytable') }} as vpt on pt.recid = vpt.recid
+inner join {{ source('fno', 'vw_dirpartytable') }} as vpt on pt.recid = vpt.recid
 left join {{ source('fno', 'companyinfo') }} as comp on pt.recid = comp.recid
 left join {{ source('fno', 'logisticselectronicaddress') }} as lea_ph on pt.primarycontactphone = lea_ph.recid
 left join {{ source('fno', 'logisticselectronicaddress') }} as lea_f on pt.primarycontactfax = lea_f.recid
 left join {{ source('fno', 'logisticselectronicaddress') }} as lea_e on pt.primarycontactemail = lea_e.recid
-
-where pt.[IsDelete] is null
+{%- if is_incremental() %}
+    where pt.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where pt.[IsDelete] is null
+{% endif %}

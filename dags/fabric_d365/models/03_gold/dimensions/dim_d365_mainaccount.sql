@@ -1,5 +1,10 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_mainaccount_sk']
+) }}
+
 select
-    {{ dbt_utils.generate_surrogate_key(['m.recid']) }} as dim_d365_mainaccount_sk
+    m.[Id] as dim_d365_mainaccount_sk
     , m.recid as mainaccount_recid
     , m.mainaccountid
     , m.name as mainaccount_name
@@ -23,7 +28,12 @@ select
     , l.gl_category_l11
     , l.gl_category_l12
     , l.gl_category_l13
-
+    , m.versionnumber
+    , m.sysrowversion
 from {{ source('fno', 'mainaccount') }} as m
 left join {{ ref('stg_dim_tm1_gl_category_level') }} as l on m.mainaccountid = l.mainaccountid
-where m.[IsDelete] is null
+{%- if is_incremental() %}
+    where m.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where m.[IsDelete] is null
+{% endif %}

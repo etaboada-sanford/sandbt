@@ -4391,6 +4391,56 @@ sources:
       data_type: varchar
     - name: PartitionId
       data_type: varchar
+  - name: dirorganizationbase
+    columns:
+    - name: Id
+      data_type: varchar
+    - name: SinkCreatedOn
+      data_type: datetime2
+    - name: SinkModifiedOn
+      data_type: datetime2
+    - name: sysdatastatecode
+      data_type: bigint
+    - name: dunsnumberrecid
+      data_type: bigint
+    - name: phoneticname
+      data_type: varchar
+    - name: modifieddatetime
+      data_type: datetime2
+    - name: modifiedby
+      data_type: varchar
+    - name: modifiedtransactionid
+      data_type: bigint
+    - name: createddatetime
+      data_type: datetime2
+    - name: createdby
+      data_type: varchar
+    - name: createdtransactionid
+      data_type: bigint
+    - name: dataareaid
+      data_type: varchar
+    - name: recversion
+      data_type: bigint
+    - name: partition
+      data_type: bigint
+    - name: sysrowversion
+      data_type: bigint
+    - name: recid
+      data_type: bigint
+    - name: tableid
+      data_type: bigint
+    - name: versionnumber
+      data_type: bigint
+    - name: createdon
+      data_type: datetime2
+    - name: modifiedon
+      data_type: datetime2
+    - name: IsDelete
+      data_type: bit
+    - name: createdonpartition
+      data_type: varchar
+    - name: PartitionId
+      data_type: varchar
   - name: dirpartylocation
     columns:
     - name: Id
@@ -5009,6 +5059,102 @@ sources:
       data_type: varchar
     - name: PartitionId
       data_type: varchar
+  - name: ecoresdistinctproduct
+    columns:
+    - name: Id
+      data_type: varchar
+    - name: SinkCreatedOn
+      data_type: datetime2
+    - name: SinkModifiedOn
+      data_type: datetime2
+    - name: sysdatastatecode
+      data_type: bigint
+    - name: modifieddatetime
+      data_type: datetime2
+    - name: modifiedby
+      data_type: varchar
+    - name: modifiedtransactionid
+      data_type: bigint
+    - name: createddatetime
+      data_type: datetime2
+    - name: createdby
+      data_type: varchar
+    - name: createdtransactionid
+      data_type: bigint
+    - name: dataareaid
+      data_type: varchar
+    - name: recversion
+      data_type: bigint
+    - name: partition
+      data_type: bigint
+    - name: sysrowversion
+      data_type: bigint
+    - name: recid
+      data_type: bigint
+    - name: tableid
+      data_type: bigint
+    - name: versionnumber
+      data_type: bigint
+    - name: createdon
+      data_type: datetime2
+    - name: modifiedon
+      data_type: datetime2
+    - name: IsDelete
+      data_type: bit
+    - name: createdonpartition
+      data_type: varchar
+    - name: PartitionId
+      data_type: varchar
+  - name: ecoresdistinctproductvariant
+    columns:
+    - name: Id
+      data_type: varchar
+    - name: SinkCreatedOn
+      data_type: datetime2
+    - name: SinkModifiedOn
+      data_type: datetime2
+    - name: sysdatastatecode
+      data_type: bigint
+    - name: productmaster
+      data_type: bigint
+    - name: retaitotalweight
+      data_type: bigint
+    - name: modifieddatetime
+      data_type: datetime2
+    - name: modifiedby
+      data_type: varchar
+    - name: modifiedtransactionid
+      data_type: bigint
+    - name: createddatetime
+      data_type: datetime2
+    - name: createdby
+      data_type: varchar
+    - name: createdtransactionid
+      data_type: bigint
+    - name: dataareaid
+      data_type: varchar
+    - name: recversion
+      data_type: bigint
+    - name: partition
+      data_type: bigint
+    - name: sysrowversion
+      data_type: bigint
+    - name: recid
+      data_type: bigint
+    - name: tableid
+      data_type: bigint
+    - name: versionnumber
+      data_type: bigint
+    - name: createdon
+      data_type: datetime2
+    - name: modifiedon
+      data_type: datetime2
+    - name: IsDelete
+      data_type: bit
+    - name: createdonpartition
+      data_type: varchar
+    - name: PartitionId
+      data_type: varchar
   - name: ecoresproduct
     columns:
     - name: Id
@@ -5093,6 +5239,62 @@ sources:
       data_type: bigint
     - name: displayorder
       data_type: decimal
+    - name: modifieddatetime
+      data_type: datetime2
+    - name: modifiedby
+      data_type: varchar
+    - name: modifiedtransactionid
+      data_type: bigint
+    - name: createddatetime
+      data_type: datetime2
+    - name: createdby
+      data_type: varchar
+    - name: createdtransactionid
+      data_type: bigint
+    - name: dataareaid
+      data_type: varchar
+    - name: recversion
+      data_type: bigint
+    - name: partition
+      data_type: bigint
+    - name: sysrowversion
+      data_type: bigint
+    - name: recid
+      data_type: bigint
+    - name: tableid
+      data_type: bigint
+    - name: versionnumber
+      data_type: bigint
+    - name: createdon
+      data_type: datetime2
+    - name: modifiedon
+      data_type: datetime2
+    - name: IsDelete
+      data_type: bit
+    - name: createdonpartition
+      data_type: varchar
+    - name: PartitionId
+      data_type: varchar
+  - name: ecoresproductmaster
+    columns:
+    - name: Id
+      data_type: varchar
+    - name: SinkCreatedOn
+      data_type: datetime2
+    - name: SinkModifiedOn
+      data_type: datetime2
+    - name: variantconfigurationtechnology
+      data_type: bigint
+    - name: isproductvariantunitconversionenabled
+      data_type: bigint
+    - name: sysdatastatecode
+      data_type: bigint
+    - name: retailcolorgroupid
+      data_type: varchar
+    - name: retailsizegroupid
+      data_type: varchar
+    - name: retailstylegroupid
+      data_type: varchar
     - name: modifieddatetime
       data_type: datetime2
     - name: modifiedby
@@ -12325,6 +12527,54 @@ sources:
       data_type: varchar
     - name: PartitionId
       data_type: varchar
+  - name: ominternalorganization
+    columns:
+    - name: Id
+      data_type: varchar
+    - name: SinkCreatedOn
+      data_type: datetime2
+    - name: SinkModifiedOn
+      data_type: datetime2
+    - name: organizationtype
+      data_type: bigint
+    - name: sysdatastatecode
+      data_type: bigint
+    - name: modifieddatetime
+      data_type: datetime2
+    - name: modifiedby
+      data_type: varchar
+    - name: modifiedtransactionid
+      data_type: bigint
+    - name: createddatetime
+      data_type: datetime2
+    - name: createdby
+      data_type: varchar
+    - name: createdtransactionid
+      data_type: bigint
+    - name: dataareaid
+      data_type: varchar
+    - name: recversion
+      data_type: bigint
+    - name: partition
+      data_type: bigint
+    - name: sysrowversion
+      data_type: bigint
+    - name: recid
+      data_type: bigint
+    - name: tableid
+      data_type: bigint
+    - name: versionnumber
+      data_type: bigint
+    - name: createdon
+      data_type: datetime2
+    - name: modifiedon
+      data_type: datetime2
+    - name: IsDelete
+      data_type: bit
+    - name: createdonpartition
+      data_type: varchar
+    - name: PartitionId
+      data_type: varchar
   - name: omoperatingunit
     columns:
     - name: Id
@@ -12377,6 +12627,62 @@ sources:
       data_type: varchar
     - name: PartitionId
       data_type: varchar
+  - name: omteam
+    columns:
+    - name: Id
+      data_type: varchar
+    - name: SinkCreatedOn
+      data_type: datetime2
+    - name: SinkModifiedOn
+      data_type: datetime2
+    - name: isactive
+      data_type: bigint
+    - name: sysdatastatecode
+      data_type: bigint
+    - name: description
+      data_type: varchar
+    - name: teamadministrator
+      data_type: varchar
+    - name: teammembershipcriterion
+      data_type: bigint
+    - name: modifieddatetime
+      data_type: datetime2
+    - name: modifiedby
+      data_type: varchar
+    - name: modifiedtransactionid
+      data_type: bigint
+    - name: createddatetime
+      data_type: datetime2
+    - name: createdby
+      data_type: varchar
+    - name: createdtransactionid
+      data_type: bigint
+    - name: dataareaid
+      data_type: varchar
+    - name: recversion
+      data_type: bigint
+    - name: partition
+      data_type: bigint
+    - name: sysrowversion
+      data_type: bigint
+    - name: recid
+      data_type: bigint
+    - name: tableid
+      data_type: bigint
+    - name: versionnumber
+      data_type: bigint
+    - name: createdon
+      data_type: datetime2
+    - name: modifiedon
+      data_type: datetime2
+    - name: IsDelete
+      data_type: bit
+    - name: createdonpartition
+      data_type: varchar
+    - name: PartitionId
+      data_type: varchar
+  - name: pcclass
+    columns: []
   - name: pdsbatchattrib
     columns:
     - name: Id

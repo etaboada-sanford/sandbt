@@ -4,9 +4,9 @@ packages:
   - package: dbt-msft/tsql_utils
     version: 0.10.0
   - package: calogica/dbt_date
-    version: 0.9.1
+    version: 0.10.1
   - package: dbt-labs/codegen
     version: 0.12.1
   - package: dbt-labs/audit_helper
     version: 0.12.0
-sha1_hash: d162d3e59818443d78f68caa9b98db993ebfbeeb
+sha1_hash: 776d5ede71b6b94cc48e37b0a1230424e16e8394

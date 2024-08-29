@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_productionorder_sk']
+) }}
+
 select
     pt.[Id] as dim_d365_productionorder_sk
     , pt.recid as productionorder_recid
@@ -5,8 +10,9 @@ select
     , pt.dxc_parentprodid as parentprodid
     , pt.prodpoolid
     , eppt.[LocalizedLabel] as prodpostingtype
-    , eps.[LocalizedLabel] as prodstatus
-    , epbs.[LocalizedLabel] as backorderstatus
+    , {{ translate_enum('eppt', 'pt.prodpostingtype' ) }} as prodpostingtype
+    , {{ translate_enum('eps', 'pt.prodstatus' ) }} as prodstatus
+    , {{ translate_enum('epbs', 'pt.backorderstatus' ) }} as backorderstatus
     , pt.dxc_salesid as salesid
     , pt.dxc_salesinventtransid as salesinventtransid
     , sl.qtyordered as salesline_qtyordered
@@ -31,25 +37,27 @@ select
     , case when pt.dxc_saleslinenumber = 0 then null else pt.dxc_saleslinenumber end as saleslinenumber
     , upper(sl.salesunit) as salesline_unit
     , round(case when upper(sl.salesunit) = 'LB' then sl.qtyordered * 0.45359237 else sl.qtyordered end, 3) as salesline_qtyordered_kg
-    , convert(date, pt.bomdate) as bomdate
-    , convert(date, pt.calcdate) as calcdate
-    , case when convert(date, pt.dlvdate) = '1900-01-01' then null
-        else convert(datetime2(0), concat(convert(varchar(10), convert(date, pt.dlvdate), 120), ' ', convert(varchar(8), dateadd(second, pt.dlvtime, 0), 108)))
+    , cast (pt.bomdate as date) as bomdate
+    , cast (pt.calcdate as date) as calcdate
+    , case when cast (pt.dlvdate as date) = '1900-01-01' then null
+        else cast (concat(convert(varchar(10), cast (pt.dlvdate as date), 120), ' ', convert(varchar(8), dateadd(second, pt.dlvtime, 0), 108)) as datetime2(0))
     end as deliverydatetime
-    , case when convert(date, pt.finisheddate) = '1900-01-01' then null else convert(date, pt.finisheddate) end as finisheddate
-    , convert(datetime2(0), concat(convert(varchar(10), convert(date, pt.latestscheddate), 120), ' ', convert(varchar(8), dateadd(second, pt.latestschedtime, 0), 108))) as latestscheduled_datetime
-    , case when convert(date, pt.scheddate) = '1900-01-01' then null else convert(date, pt.scheddate) end as scheddate
-    , case when convert(date, pt.schedend) = '1900-01-01' then null else convert(date, pt.schedend) end as schedenddate
-    , case when convert(date, pt.schedstart) = '1900-01-01' then null else convert(date, pt.schedstart) end as schedstartdate
-    , convert(time(0), dateadd(second, pt.schedfromtime, 0)) as schedfromtime
-    , convert(time(0), dateadd(second, pt.schedtotime, 0)) as schedtotime
-    , case when convert(date, pt.realdate) = '1900-01-01' then null else convert(date, pt.realdate) end as realdate
-    , case when convert(date, pt.releaseddate) = '1900-01-01' then null else convert(date, pt.releaseddate) end as releaseddate
-    , case when convert(date, pt.dlvdate) > '1900-01-01' then convert(date, pt.dlvdate)
-        else convert(date, pt.releaseddate)
+    , case when cast (pt.finisheddate as date) = '1900-01-01' then null else cast (pt.finisheddate as date) end as finisheddate
+    , cast (concat(convert(varchar(10), cast (pt.latestscheddate as date), 120), ' ', convert(varchar(8), dateadd(second, pt.latestschedtime, 0), 108)) as datetime2(0)) as latestscheduled_datetime
+    , case when cast (pt.scheddate as date) = '1900-01-01' then null else cast (pt.scheddate as date) end as scheddate
+    , case when cast (pt.schedend as date) = '1900-01-01' then null else cast (pt.schedend as date) end as schedenddate
+    , case when cast (pt.schedstart as date) = '1900-01-01' then null else cast (pt.schedstart as date) end as schedstartdate
+    , cast (dateadd(second, pt.schedfromtime, 0) as time(0)) as schedfromtime
+    , cast (dateadd(second, pt.schedtotime, 0) as time(0)) as schedtotime
+    , case when cast (pt.realdate as date) = '1900-01-01' then null else cast (pt.realdate as date) end as realdate
+    , case when cast (pt.releaseddate as date) = '1900-01-01' then null else cast (pt.releaseddate as date) end as releaseddate
+    , case when cast (pt.dlvdate as date) > '1900-01-01' then cast (pt.dlvdate as date)
+        else cast (pt.releaseddate as date)
     end as reportdate
     , coalesce(eirt.[LocalizedLabel], 'None') as inventreftype
     , upper(pt.dataareaid) as prod_dataareaid
+    , pt.versionnumber
+    , pt.sysrowversion
 from {{ source('fno', 'prodtable') }} as pt
 
 left join
@@ -61,31 +69,27 @@ left join
         and sl.[IsDelete] is null
 
 /* ProdStatus -> ProdStatus */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as eps
+cross apply stage.f_get_enum_translation('prodtable', '1033') as eps
     on eps.[OptionSetName] = 'prodstatus'
         and pt.prodstatus = eps.[Option]
         and eps.[EntityName] = 'prodtable'
 /* backorderstatus -> ProdBackStatus */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as epbs
+cross apply stage.f_get_enum_translation('prodtable', '1033') as epbs
     on epbs.[OptionSetName] = 'backorderstatus'
         and pt.backorderstatus = epbs.[Option]
         and epbs.[EntityName] = 'prodtable'
 /* ProdPostingType -> ProdPostingType */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as eppt
+cross apply stage.f_get_enum_translation('prodtable', '1033') as eppt
     on eppt.[OptionSetName] = 'prodpostingtype'
         and pt.prodpostingtype = eppt.[Option]
         and eppt.[EntityName] = 'prodtable'
 /* InventRefType -> InventRefType */
-left join
-    {{ source('fno', 'GlobalOptionsetMetadata') }}
-        as eirt
+cross apply stage.f_get_enum_translation('prodtable', '1033') as eirt
     on eirt.[OptionSetName] = 'inventreftype'
         and pt.inventreftype = eirt.[Option]
         and eirt.[EntityName] = 'prodtable'
-where pt.[IsDelete] is null
+{%- if is_incremental() %}
+    where pt.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where pt.[IsDelete] is null
+{% endif %}

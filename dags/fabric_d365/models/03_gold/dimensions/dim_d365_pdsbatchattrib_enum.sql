@@ -1,3 +1,8 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_pdsbatchattrib_enum_sk']
+) }}
+
 with uniquevalues as (
     select distinct mserp_dxc_pdsitembatchattributeenumerationvalueentityid
     from {{ source('mserp', 'dxc_pdsitembatchattributeenumerationvalueentity') }}

@@ -1,12 +1,23 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_customergroup_sk']
+) }}
+
 select
-    [Id] as dim_d365_customergroup_sk
-    , recid as customergroup_recid
-    , custgroup as customergroup
-    , defaultdimension
-    , name as customergroup_name
-    , paymtermid
-    , partition
-    , [IsDelete]
-    , upper(dataareaid) as customergroup_dataareaid
-from {{ source('fno', 'custgroup') }}
-where [IsDelete] is null
+    cg.[Id] as dim_d365_customergroup_sk
+    , cg.recid as customergroup_recid
+    , cg.custgroup as customergroup
+    , cg.defaultdimension
+    , cg.name as customergroup_name
+    , cg.paymtermid
+    , cg.partition
+    , cg.[IsDelete]
+    , cg.versionnumber
+    , cg.sysrowversion
+    , upper(cg.dataareaid) as customergroup_dataareaid
+from {{ source('fno', 'custgroup') }} as cg
+{%- if is_incremental() %}
+    where cg.sysrowversion > {{ get_max_sysrowversion() }}
+{% else %}
+    where cg.[IsDelete] is null
+{% endif %}

@@ -1,7 +1,14 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_item_sk']
+) }}
+
 with seafood_item_excl as (
     select distinct
         itemid
         , dataareaid
+        , versionnumber
+        , sysrowversion
     from {{ source('fno', 'inventtable') }}
     where
         (
@@ -17,7 +24,7 @@ with seafood_item_excl as (
         , i.namealias
         , pt.name as item_name
         , i.itemtype
-        , enumit.[LocalizedLabel] as itemtype_desc
+        , {{ translate_enum('enumit', 'i.itemtype' ) }} as itemtype_desc
         , igi.itemgroupid
         , ig.name as itemgroup_name
         , sdg.name as itemstoragedimensiongroupid
@@ -60,11 +67,11 @@ with seafood_item_excl as (
         , mpist.mserp_dxc_mpiitemdesc as mpistate_desc
         , i.dxc_mpiunit as mpiunit
         , i.dxc_appliedweight as appliedweight
-        , aw.[LocalizedLabel] as appliedweight_name
-        , aw.[LocalizedLabel] as appliedweight_label
+        , {{ translate_enum('aw', 'i.dxc_appliedweight' ) }} as appliedweight_name
+        , {{ translate_enum('aw', 'i.dxc_appliedweight' ) }} as appliedweight_label
         , i.dxc_maximumweight as maximumweight
         , i.dxc_storagecondition as storagecondition -- [appliedweight_name]
-        , isc.[LocalizedLabel] as storagecondition_name -- [enum_item_label]
+        , {{ translate_enum('isc', 'i.dxc_storagecondition' ) }} as storagecondition_name
         , i.dxc_legacyitemcode as legacyitemcode
         , i.dxc_labelformat as labelformat
         , i.dxc_sizename as sizename
@@ -78,7 +85,7 @@ with seafood_item_excl as (
         , i.dxc_batchattributegroupid as batchattributegroupid
         , i.dxc_autopurchinvoiceconsitems as is_consignmentitemautopurchinvoice
         , i.product
-        , enum.[LocalizedLabel] as producttype
+        , {{ translate_enum('enum', 'p.producttype' ) }} as producttype
         , i.partition
         , i.recversion
         , i.modifiedon as lastprocessedchange_datetime
@@ -174,15 +181,8 @@ with seafood_item_excl as (
         on i.itemid = invenbl.itemid
             and upper(invenbl.dataareaid) = upper(i.dataareaid)
             and invenbl.[IsDelete] is null
-    left join {{ source('fno', 'GlobalOptionsetMetadata') }} as enumit
-        on i.itemtype = enumit.[Option]
-            and enumit.[OptionSetName] = 'itemtype'
-            and enumit.[EntityName] = 'inventtable'
-
-    left join {{ source('fno', 'GlobalOptionsetMetadata') }} as enum
-        on p.producttype = enum.[Option]
-            and enum.[OptionSetName] = 'producttype'
-            and enum.[EntityName] = 'ecoresproduct'
+    cross apply stage.f_get_enum_translation('inventtable', '1033') as enumit
+    cross apply stage.f_get_enum_translation('ecoresproduct', '1033') as enum
 
     /* adding planning product categories against the dim as per commercial finance requirements */
     left join
@@ -196,15 +196,8 @@ with seafood_item_excl as (
     --left join { { s o u r ce('fno', 'dxc_packagingconfigurationtable') }} pck on i.dxc_packagingcode = pck.packagingcode and upper(i.dataareaid) = upper(pck.dataareaid)
     --left join { { r e f ('stg_dim_d365_item_std_cost_1') }} icst on i.itemid = icst.itemid and upper(i.dataareaid)  = upper(icst.item_standardcost_dataareaid)
     */
-    left join {{ source('fno', 'GlobalOptionsetMetadata') }} as isc
-        on i.dxc_storagecondition = isc.[Option]
-            and isc.[OptionSetName] = 'dxc_storagecondition'
-            and isc.[EntityName] = 'inventtable'
-
-    left join {{ source('fno', 'GlobalOptionsetMetadata') }} as aw
-        on i.dxc_appliedweight = aw.[Option]
-            and aw.[OptionSetName] = 'dxc_appliedweight'
-            and aw.[EntityName] = 'inventtable'
+    cross apply stage.f_get_enum_translation('inventtable', '1033') as isc
+    cross apply stage.f_get_enum_translation('inventtable', '1033') as aw
 
     left join
         {{ ref('stg_dim_d365_item_allocation') }}
@@ -220,7 +213,7 @@ with seafood_item_excl as (
     left join {{ ref('dim_d365_financialdimensionvalueset') }} as fdv on i.defaultdimension = fdv.financialdimensionvalueset_recid
 
     left join
-        {{ ref('fct_d365_inventitemprice_latest') }}
+        {{ ref('stg_fct_d365_inventitemprice_latest') }}
             as lcst
         on i.itemid = lcst.itemid and upper(i.dataareaid) = lcst.inventitemprice_dataareaid
             and lcst.inventsiteid = 'TRANSIT'
@@ -403,4 +396,4 @@ select
     , sales_allocation
     , [IsDelete]
     , sales_target_item_flag
-from {{ ref('int_nav_dummy_salesitem') }}
+from {{ ref('stg_nav_dummy_salesitem') }}

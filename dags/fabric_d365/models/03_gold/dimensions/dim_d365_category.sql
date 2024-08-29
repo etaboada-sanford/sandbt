@@ -1,3 +1,9 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_category_sk'],
+    tags = ['pyspark_generated_source']
+) }}
+
 {%- set levels = [1, 2, 3, 4, 5, 6, 7] %}
 
 with ctcat as (
@@ -9,8 +15,16 @@ with ctcat as (
         , c.category_name
         , c.categoryhierarchy
         , c.category_path
-    from
-        {{ source('stage', 'stg_d365_category') }} as c
+        , c.sysrowversion
+        , c.versionnumber
+        , case when c.[IsDelete] = 0 then null else c.[IsDelete] end as [IsDelete]
+    from {{ source('stage', 'stg_d365_category') }} as c
+    {%- if is_incremental() %}
+        where c.sysrowversion > {{ get_max_sysrowversion() }}
+    {% else %}
+        where c.[IsDelete] null or c.[IsDelete] = 0
+    {% endif %}
+
 )
 
 , ctcat1 as (
@@ -46,7 +60,19 @@ with ctcat as (
 )
 
 select
-    ctcat1.*
+    ctcat1.dim_d365_category_sk
+    , ctcat1.category_recid
+    , ctcat1.parentcategory
+    , ctcat1.category_level
+    , ctcat1.category_name
+    , ctcat1.categoryhierarchy
+    , ctcat1.category_path
+    , ctcat1.parentcategory_name
+    , ctcat1.category_hierarchy
+    , ctcat1.category_path_level
+    , ctcat1.[IsDelete]
+    , ctcat1.sysrowversion
+    , ctcat1.versionnumber
     {% for level in levels -%}
         , ctsplit.category_path_level_{{ level }}
     {% endfor -%}  
@@ -64,7 +90,9 @@ select
     , '' as parentcategory_name
     , '' as category_hierarchy
     , '' as category_path_level
+    , null as [IsDelete]
+    , 0 as sysrowversion
+    , 0 as versionnumber
     {% for level in levels -%}
-        ,
-        null as category_path_level_{{ level }}
-        {%- endfor %}
+        , null as category_path_level_{{ level }}
+        {% endfor %}

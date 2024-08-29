@@ -6,6 +6,9 @@ unset ENV
 python_exe=${1:-"python"}
 echo "Python executable: " $python_exe
 
+SCRIPT_PATH=$(dirname "$(realpath "$0")")
+echo "The full path of the script is: $SCRIPT_PATH"
+
 if [ ! -f .venv/Scripts/activate ]; then
   echo "*** Creating virtual environment."
   $python_exe -m venv .venv
@@ -32,7 +35,7 @@ if [ -f .venv/Scripts/activate ] && [ -r .venv/Scripts/activate ]; then
     echo "- SCRIPTS environment variable is already initialized in activate script"
   fi
 
-  if ! grep -q "export ENV" .venv/Scripts/activate; then
+  if ! grep -q "export ENV" $(pwd)/.venv/Scripts/activate; then
     # execute the command
     echo export ENV=dev >> .venv/Scripts/activate
     echo "- ENV environment variable initialized in activate script"
@@ -48,7 +51,7 @@ fi
 if [ -f /etc/bash.bashrc ] && [ -r /etc/bash.bashrc ] && [ -w /etc/bash.bashrc ]; then
   if ! grep -q "alias sandbt" /etc/bash.bashrc; then
     # execute the command
-    echo "alias sandbt='source .venv/Scripts/activate'" >> /etc/bash.bashrc
+    echo "alias sandbt='source $(pwd)/.venv/Scripts/activate;cd $(pwd)/dags/fabric_d365'" >> /etc/bash.bashrc
     echo "- alias sandbt completed setup."
   else
     echo "- alias sandbt is already setup."
@@ -87,7 +90,7 @@ fi
 alias sandbt='source .venv/Scripts/activate'
 
 echo "*** Activating virtual environment."
-source .venv/Scripts/activate
+source $(pwd)/.venv/Scripts/activate
 
 echo "*** Checking environment variables. Make sure that they all have values..."
 echo "- DBT_PROJECT = [$DBT_PROJECT]"

@@ -1,9 +1,16 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['exchangerate_recid']
+) }}
+
 with 
 /* purchase order lines to 'receipt' matched quantity
  distinct needed as vendinvoicepackingslipquantitymatch recids may not be unique in stg_fct_d365_vendorinvoicematching_1
  */
 ctepackingslipmatch as (
     select pl.recid purchaseorderline_recid
+        , pl.versionnumber
+        , pl.sysrowversion
         , round(sum(vipsqm.quantity), 3) qty
     from {{source('fno', 'purchline')}} pl
     join (
@@ -13,7 +20,7 @@ ctepackingslipmatch as (
         from {{ref('stg_fct_d365_vendorinvoicematching_1')}} vim
         ) vim on pl.recid = vim.pl_recid
     join {{source('fno', 'vendinvoicepackingslipquantitymatch')}} vipsqm on vipsqm.recid = vim.vipsqm_recid
-    group by pl.recid
+    group by pl.recid, pl.versionnumber, pl.sysrowversion
     )
 ,
 /* Receipts against the line - quantity
@@ -21,6 +28,8 @@ ctepackingslipmatch as (
 */
 ctepackingslip as (
     select pl.recid purchaseorderline_recid
+        , pl.versionnumber
+        , pl.sysrowversion
         , round(sum(vpsl.qty), 3) qty
     from {{source('fno', 'purchline')}} pl
     join (
@@ -30,7 +39,7 @@ ctepackingslip as (
         from {{ref('stg_fct_d365_vendorinvoicematching_1')}} vim
         ) vim on pl.recid = vim.pl_recid
     join {{source('fno', 'vendpackingsliptrans')}} vpsl on vim.vpsl_recid = vpsl.recid
-    group by pl.recid
+    group by pl.recid, pl.versionnumber, pl.sysrowversion
     )
 ,
 
@@ -41,6 +50,8 @@ ctepackingslip as (
 cteinv as (
     select pl.recid purchaseorderline_recid
         , vit.currencycode
+        , pl.versionnumber
+        , pl.sysrowversion
         , max(vit.invoicedate) as invoicedate
         , sum(vit.qty) as invoiceqty
         , sum(vit.lineamount) as invoicelineamount
@@ -52,8 +63,7 @@ cteinv as (
         from {{ref('stg_fct_d365_vendorinvoicematching_1')}} vim
         ) vim on pl.recid = vim.pl_recid
     join {{source('fno', 'vendinvoicetrans')}} vit on vit.recid = vim.vit_recid
-    group by pl.recid
-        , vit.currencycode
+    group by pl.recid, vit.currencycode, pl.versionnumber, pl.sysrowversion
 )
 ,
 

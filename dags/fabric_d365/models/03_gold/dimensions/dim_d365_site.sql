@@ -1,6 +1,12 @@
+{{ config(
+    materialized = 'incremental', 
+    unique_key = ['dim_d365_site_sk']
+) }}
+
 with navision as (
     select
-        999999 as site_recid
+        {{ dbt_utils.generate_surrogate_key(['\'999999\'', '\'NAV999\'']) }} as dim_d365_site_sk
+        , 999999 as site_recid
         , 'NAV999' as siteid
         , 'Navision not migrated' as site_name
         , 'SANF' as site_dataareaid
@@ -8,8 +14,9 @@ with navision as (
         , null as defaultdimension
         , null as defaultinventstatusid
         , null as dxc_defaultdimension
-        , null as partition
         , 0 as [IsDelete]
+        , 0 as versionnumber
+        , 0 as sysrowversion
 )
 
 select
@@ -22,13 +29,16 @@ select
     , st.defaultdimension
     , st.defaultinventstatusid
     , st.dxc_defaultdimension
-    , st.partition
     , st.[IsDelete]
+    , st.versionnumber
+    , st.sysrowversion
 from {{ source('fno', 'inventsite') }} as st
-where st.[IsDelete] is null
+{%- if is_incremental() %}
+    where st.sysrowversion > {{ get_max_sysrowversion() }}
+{%- else %}
+    where st.[IsDelete] is null
+{% endif %}
 union all
 /* Site not migrated from Navision */
-select
-    {{ dbt_utils.generate_surrogate_key(['site_recid', 'siteid']) }} as dim_d365_site_sk
-    , *
+select *
 from navision

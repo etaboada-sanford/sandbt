@@ -11,7 +11,7 @@ templater = dbt
 # See https://docs.sqlfluff.com/en/stable/configuration.html#enabling-and-disabling-rules
 # AM04 (ambiguous.column_count) and ST06 (structure.column_order) are
 # two of the more controversial rules included to illustrate usage.
-exclude_rules = references.quoting, ambiguous.column_count, references.from, references.keywords
+exclude_rules = references.quoting, ambiguous.column_count, references.from, references.keywords, layout.end_of_file, structure.column_order
 
 # The standard max_line_length is 80 in line with the convention of
 # other tools and several style guides. Many projects however prefer
@@ -58,7 +58,7 @@ force_enable = False
 preferred_quote_identifier = "["
 
 [sqlfluff:rules:references.quoting]
-ignore_words = IsDelete, Option, LocalizedLabel, EntityName, OptionSetName, Id, SinkModifiedOn
+ignore_words = IsDelete, Option, LocalizedLabel, EntityName, OptionSetName, Id, SinkModifiedOn, ExternalValue, IsUserLocalizedLabel, LocalizedLabelLanguageCode, GlobalOptionSetName, createdonpartition, partition, role
 
 # The default configuration for capitalisation rules is "consistent"
 # which will auto-detect the setting from the rest of the file. This
