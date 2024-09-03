@@ -9,13 +9,15 @@ profile: fabric_d365
 
 vars:
   'dbt_date:time_zone': 'Pacific/Auckland'
+  'dim_date_from': '2019-01-01'
+  'dim_date_to': '2029-12-31'
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
 # found in the "models/" directory. You probably won"t need to change these!
 model-paths: [models]
 analysis-paths: [analyses]
-test-paths: [tests]
+test-paths: [data_tests]
 seed-paths: [seeds]
 macro-paths: [macros]
 snapshot-paths: [snapshots]
@@ -29,11 +31,13 @@ models:
     02_silver:
       +database: dwh_sanford
       +schema: stage
-      +materialized: table
+      +materialized: incremental
+      +on_schema_change: "sync_all_columns"
     03_gold:
       +database: dwh_sanford
       +schema: dw
-      +materialized: table
+      +materialized: incremental
+      +on_schema_change: "sync_all_columns"
 
 seeds:
   d365:

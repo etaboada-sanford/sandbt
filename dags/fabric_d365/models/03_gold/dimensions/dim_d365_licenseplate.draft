@@ -40,7 +40,7 @@ with ctlp as (
         , egh.dxc_inventdispositionreasoncode inventdispositionreasoncode
         , egh.dxc_lpdispositiondetails lpdispositiondetails
         , cdatetime.NewZealandTime as createddatetime
-        , rank() over (partition by transrefid order by createddatetime desc, _sysrowid desc ) rnk
+        , rank() over (partition by transrefid order by createddatetime desc, recid desc ) rnk
     from  source('fno', 'eglaqcinventdimdispositionhistory')  egh
     cross apply dbo.ConvertUtcToNzt(createddatetime) as cdatetime
     where coalesce(dxc_inventdispositionreasoncode, '') != '' or coalesce(dxc_lpdispositiondetails, '') != ''

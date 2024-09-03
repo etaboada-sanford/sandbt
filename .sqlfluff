@@ -58,7 +58,7 @@ force_enable = False
 preferred_quote_identifier = "["
 
 [sqlfluff:rules:references.quoting]
-ignore_words = IsDelete, Option, LocalizedLabel, EntityName, OptionSetName, Id, SinkModifiedOn, ExternalValue, IsUserLocalizedLabel, LocalizedLabelLanguageCode, GlobalOptionSetName, createdonpartition, partition, role
+ignore_words = IsDelete, Option, LocalizedLabel, EntityName, OptionSetName, Id, SinkModifiedOn, ExternalValue, IsUserLocalizedLabel, LocalizedLabelLanguageCode, GlobalOptionSetName, createdonpartition, partition, role, year
 
 # The default configuration for capitalisation rules is "consistent"
 # which will auto-detect the setting from the rest of the file. This

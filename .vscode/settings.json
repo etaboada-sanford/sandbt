@@ -75,7 +75,7 @@
         "RF06: references.quoting",
         "CP02: capitalisation.identifiers",
         "ST06: structure.column_order",
-        "ST06"
+        "RF04: references.keywords"
     ],
     "sqlfluff.ignoreLocalConfig": false,
     "sqlfluff.ignoreParsing": false,
