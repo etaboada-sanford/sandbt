@@ -1,6 +1,5 @@
 dbt_packages/
-target/compiled
-target/run
+target/
 logs/
 .venv/
 .trunk/
