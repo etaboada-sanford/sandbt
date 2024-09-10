@@ -14,7 +14,7 @@ default_args = {
 
 # Instantiate the DAG object
 with DAG(
-    'hello_airflow_dag',
+    'checking_sytem_dag',
     default_args=default_args,
     description='A simple Hello World DAG',
     schedule_interval=None,
