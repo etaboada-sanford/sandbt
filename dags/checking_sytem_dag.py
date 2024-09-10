@@ -16,7 +16,7 @@ default_args = {
 with DAG(
     'checking_sytem_dag',
     default_args=default_args,
-    description='A simple Hello World DAG',
+    description='A DAG that lists files in /opt/airflow/dags',
     schedule_interval=None,
     catchup=False
 ) as dag:
