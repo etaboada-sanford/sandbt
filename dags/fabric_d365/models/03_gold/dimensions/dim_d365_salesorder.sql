@@ -144,9 +144,9 @@ with d365_sales as (
     left join {{ source('fno', 'inventlocation') }} as l on so.inventlocationid = l.inventlocationid and upper(so.dataareaid) = upper(l.dataareaid) and so.[IsDelete] is null
     left join {{ source('fno', 'inventsite') }} as si on so.inventsiteid = si.siteid and upper(si.dataareaid) = upper(l.dataareaid) and so.[IsDelete] is null
 
-    cross apply stage.f_get_enum_translation('salestable', '1033') as est
-    cross apply stage.f_get_enum_translation('salestable', '1033') as ests
-    cross apply stage.f_get_enum_translation('salestable', '1033') as e
+    cross apply dbo.f_get_enum_translation('salestable', '1033') as est
+    cross apply dbo.f_get_enum_translation('salestable', '1033') as ests
+    cross apply dbo.f_get_enum_translation('salestable', '1033') as e
 
     left join {{ source('fno', 'dlvmode') }} as d on so.dlvmode = d.code and upper(so.dataareaid) = upper(d.dataareaid) and d.[IsDelete] is null
 

@@ -42,8 +42,8 @@ select
     , il.sysrowversion
 from {{ source('fno', 'inventlocation') }} as il
 left join {{ source('fno', 'inventsite') }} as st on il.inventsiteid = st.siteid and upper(il.dataareaid) = upper(st.dataareaid) and st.[IsDelete] is null
-cross apply stage.f_get_enum_translation('inventlocation', '1033') as eot
-cross apply stage.f_get_enum_translation('inventlocation', '1033') as ewt
+cross apply dbo.f_get_enum_translation('inventlocation', '1033') as eot
+cross apply dbo.f_get_enum_translation('inventlocation', '1033') as ewt
 
 {%- if is_incremental() %}
     where il.sysrowversion > {{ get_max_sysrowversion() }}

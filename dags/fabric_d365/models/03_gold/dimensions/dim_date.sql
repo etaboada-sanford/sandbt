@@ -4,12 +4,14 @@
     )
 }}
 
+{%- set current_timestamp = modules.datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') -%}
+
 with source as (
     select
         cast(convert(varchar, date, 112) as int) as dim_date_key
         , date as calendar_date
         , cast(convert(varchar, date, 112) as int) as month_key
-        , cast({{ dbt_date.now() }} as date) as today
+        , cast('{{ current_timestamp }}' as date) as today
         , day(date) as day_num_in_month
         , month(date) as month_num_in_year
         , year(date) as [year]
@@ -47,13 +49,12 @@ with source as (
         , case when month(date) <= 9 then year(date) else year(date) + 1 end as fiscal_year
         , case when month(date) <= 9 then datepart(quarter, date) + 1 else datepart(quarter, date) - 3 end as fiscal_quarter
     from (
-        select dateadd(day, value, '{{ var("dim_date_from") }}') as [date]
+        select cast(dateadd(day, value, '{{ var("dim_date_from") }}') as datetime2(6)) as [date]
         from generate_series(0, datediff(day, '{{ var("dim_date_from") }}', '{{ var("dim_date_to") }}'))
     ) as daterange
 )
 
-select
-    dim_date_key
+select dim_date_key
     , calendar_date
     , day_num_in_month
     , month_num_in_year
@@ -68,19 +69,19 @@ select
     , quarter_end_day
     , quarter_start_day
     , today
-    , case when calendar_date = cast({{ dbt_date.now() }} as date) then 1 else 0 end as yesterday
-    , case when month(calendar_date) = month({{ dbt_date.now() }}) and year(calendar_date) = year({{ dbt_date.now() }}) then 1 else 0 end as this_month
-    , case when datepart(quarter, calendar_date) = datepart(quarter, {{ dbt_date.now() }}) and year(calendar_date) = year({{ dbt_date.now() }}) then 1 else 0 end as current_quarter
-    , case when datepart(week, calendar_date) = datepart(week, {{ dbt_date.now() }}) and year(calendar_date) = year({{ dbt_date.now() }}) then 1 else 0 end as current_week
-    , case when month(calendar_date) = month(dateadd(month, -1, {{ dbt_date.now() }})) and year(calendar_date) = year(dateadd(month, -1, {{ dbt_date.now() }})) then 1 else 0 end as last_month
-    , case when calendar_date between dateadd(month, -3, {{ dbt_date.now() }}) and {{ dbt_date.now() }} then 1 else 0 end as previous_3_months
-    , case when calendar_date between dateadd(month, -12, {{ dbt_date.now() }}) and {{ dbt_date.now() }} then 1 else 0 end as previous_12_months
-    , case when calendar_date between dateadd(day, -30, {{ dbt_date.now() }}) and {{ dbt_date.now() }} then 1 else 0 end as previous_30_days
-    , case when calendar_date between dateadd(day, -60, {{ dbt_date.now() }}) and {{ dbt_date.now() }} then 1 else 0 end as previous_60_days
-    , case when calendar_date between dateadd(month, -3, {{ dbt_date.now() }}) and {{ dbt_date.now() }} or month(calendar_date) = month({{ dbt_date.now() }}) and year(calendar_date) = year({{ dbt_date.now() }}) then 1 else 0 end as last_3_months
-    , case when calendar_date between dateadd(month, -12, {{ dbt_date.now() }}) and {{ dbt_date.now() }} or month(calendar_date) = month({{ dbt_date.now() }}) and year(calendar_date) = year({{ dbt_date.now() }}) then 1 else 0 end as last_12_months
-    , case when calendar_date between dateadd(day, -30, {{ dbt_date.now() }}) and {{ dbt_date.now() }} or calendar_date = cast({{ dbt_date.now() }} as date) then 1 else 0 end as last_30_days
-    , case when calendar_date between dateadd(day, -60, {{ dbt_date.now() }}) and {{ dbt_date.now() }} or calendar_date = cast({{ dbt_date.now() }} as date) then 1 else 0 end as last_60_days
+    , case when calendar_date = cast('{{ current_timestamp }}' as date) then 1 else 0 end as yesterday
+    , case when month(calendar_date) = month('{{ current_timestamp }}') and year(calendar_date) = year('{{ current_timestamp }}') then 1 else 0 end as this_month
+    , case when datepart(quarter, calendar_date) = datepart(quarter, '{{ current_timestamp }}') and year(calendar_date) = year('{{ current_timestamp }}') then 1 else 0 end as current_quarter
+    , case when datepart(week, calendar_date) = datepart(week, '{{ current_timestamp }}') and year(calendar_date) = year('{{ current_timestamp }}') then 1 else 0 end as current_week
+    , case when month(calendar_date) = month(dateadd(month, -1, '{{ current_timestamp }}')) and year(calendar_date) = year(dateadd(month, -1, '{{ current_timestamp }}')) then 1 else 0 end as last_month
+    , case when calendar_date between dateadd(month, -3, '{{ current_timestamp }}') and '{{ current_timestamp }}' then 1 else 0 end as previous_3_months
+    , case when calendar_date between dateadd(month, -12, '{{ current_timestamp }}') and '{{ current_timestamp }}' then 1 else 0 end as previous_12_months
+    , case when calendar_date between dateadd(day, -30, '{{ current_timestamp }}') and '{{ current_timestamp }}' then 1 else 0 end as previous_30_days
+    , case when calendar_date between dateadd(day, -60, '{{ current_timestamp }}') and '{{ current_timestamp }}' then 1 else 0 end as previous_60_days
+    , case when calendar_date between dateadd(month, -3, '{{ current_timestamp }}') and '{{ current_timestamp }}' or month(calendar_date) = month('{{ current_timestamp }}') and year(calendar_date) = year('{{ current_timestamp }}') then 1 else 0 end as last_3_months
+    , case when calendar_date between dateadd(month, -12, '{{ current_timestamp }}') and '{{ current_timestamp }}' or month(calendar_date) = month('{{ current_timestamp }}') and year(calendar_date) = year('{{ current_timestamp }}') then 1 else 0 end as last_12_months
+    , case when calendar_date between dateadd(day, -30, '{{ current_timestamp }}') and '{{ current_timestamp }}' or calendar_date = cast('{{ current_timestamp }}' as date) then 1 else 0 end as last_30_days
+    , case when calendar_date between dateadd(day, -60, '{{ current_timestamp }}') and '{{ current_timestamp }}' or calendar_date = cast('{{ current_timestamp }}' as date) then 1 else 0 end as last_60_days
     , left(month_name, 3) as month_abbrev
     , 'FY ' + cast(case when month(calendar_date) <= 9 then year(calendar_date) else year(calendar_date) + 1 end as varchar) as fy_year
     , 'Q' + cast(case when month(calendar_date) <= 9 then datepart(quarter, calendar_date) + 1 else datepart(quarter, calendar_date) - 3 end as varchar) as fy_quarter

@@ -79,8 +79,8 @@ with ct as (
     from {{ source('fno', 'workflowtrackingstatustable') }} as wtst
     left join {{ source('fno', 'workflowtrackingtable') }} as wtt on wtst.recid = wtt.workflowtrackingstatustable
 
-    cross apply stage.f_get_enum_translation('workflowtrackingtable', '1033') as ewtt
-    cross apply stage.f_get_enum_translation('workflowtrackingtable', '1033') as ewtc
+    cross apply dbo.f_get_enum_translation('workflowtrackingtable', '1033') as ewtt
+    cross apply dbo.f_get_enum_translation('workflowtrackingtable', '1033') as ewtc
     /*
     left join { {s o u rce('mserp', 'dxc_purchpurchreqworkflowtable')}} pprwt on wtst.contexttableid = 67286
         and wtst.contextrecid = pprwt.mserp_recid

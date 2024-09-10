@@ -49,8 +49,8 @@ select
 from {{ source('fno', 'purchtable') }} as pt
 
 left join {{ source('fno', 'inventsite') }} as s on pt.inventsiteid = s.siteid and upper(s.dataareaid) = upper(pt.dataareaid)
-cross apply stage.f_get_enum_translation('purchtable', '1033') as eps
-cross apply stage.f_get_enum_translation('purchtable', '1033') as ept
+cross apply dbo.f_get_enum_translation('purchtable', '1033') as eps
+cross apply dbo.f_get_enum_translation('purchtable', '1033') as ept
 left join {{ source('fno', 'inventlocation') }} as w on pt.inventlocationid = w.inventlocationid and upper(pt.dataareaid) = upper(w.dataareaid)
 left join {{ source('fno', 'hcmworker') }} as h on pt.workerpurchplacer = h.recid
 left join {{ ref('dim_d365_party') }} as p on h.person = p.party_recid

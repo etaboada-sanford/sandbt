@@ -22,7 +22,7 @@ select
 from {{ source('fno', 'logisticselectronicaddress') }} as lea
 left join {{ source('fno', 'logisticslocation') }} as ll on lea.location = ll.recid
 left join {{ source('fno', 'dirpartylocation') }} as pl on ll.recid = pl.location
-cross apply stage.f_get_enum_translation('logisticselectronicaddress', '1033') as logisticselectronicaddress_enum
+cross apply dbo.f_get_enum_translation('logisticselectronicaddress', '1033') as logisticselectronicaddress_enum
 {%- if is_incremental() %}
     where lea.sysrowversion > {{ get_max_sysrowversion() }}
 {% else %}

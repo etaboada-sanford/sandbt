@@ -45,8 +45,8 @@ left join {{ source('fno', 'syspolicyruletype') }} as sprt
     on spr.policyruletype = sprt.recid
         and sprt.[IsDelete] is null
 
-cross apply stage.f_get_enum_translation('syspolicytype', '1033') as ehp
-cross apply stage.f_get_enum_translation('syspolicytype', '1033') as ept
+cross apply dbo.f_get_enum_translation('syspolicytype', '1033') as ehp
+cross apply dbo.f_get_enum_translation('syspolicytype', '1033') as ept
 cross apply dbo.f_convert_utc_to_nzt(spr.validfrom) as sprvf
 cross apply dbo.f_convert_utc_to_nzt(spr.validto) as sprvt
 

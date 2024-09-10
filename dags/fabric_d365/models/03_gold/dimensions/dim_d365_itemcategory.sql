@@ -38,7 +38,7 @@ with ctitemcat as (
         left join {{ source('fno', 'ecoresproducttranslation') }} as pt on i.product = pt.recid and pt.[IsDelete] is null and pt.languageid = 'en-NZ'
         inner join {{ source('fno', 'ecoresproductcategory') }} as pcat on p.recid = pcat.product and pcat.[IsDelete] is null
         inner join {{ ref('dim_d365_category') }} as cat on pcat.category = cat.category_recid
-        cross apply stage.f_get_enum_translation('ecoresproduct', '1033') as enum
+        cross apply dbo.f_get_enum_translation('ecoresproduct', '1033') as enum
         {%- if is_incremental() %}
             where i.sysrowversion > {{ get_max_sysrowversion() }}
         {%- else %}

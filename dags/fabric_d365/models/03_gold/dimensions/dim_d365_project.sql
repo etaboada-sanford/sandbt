@@ -74,7 +74,7 @@ select
     , pr.versionnumber
     , pr.sysrowversion
 from {{ source('fno', 'projtable') }} as pr
-cross apply stage.f_get_enum_translation('projtable', '1033') as e
+cross apply dbo.f_get_enum_translation('projtable', '1033') as e
 left join {{ source('fno', 'hcmworker') }} as w on cast(pr.workerresponsible as varchar) = cast(w.recid as varchar) and w.[IsDelete] is null
 left join {{ ref('dim_d365_party') }} as pt on w.person = pt.party_recid and pt.[IsDelete] is null
 left join {{ ref('dim_d365_projgroup') }} as pg on pr.projgroupid = pg.projgroupid and upper(pr.dataareaid) = pg.projgroup_dataareaid and pg.[IsDelete] is null

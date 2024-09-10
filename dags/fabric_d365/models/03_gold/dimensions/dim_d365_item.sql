@@ -181,8 +181,8 @@ with seafood_item_excl as (
         on i.itemid = invenbl.itemid
             and upper(invenbl.dataareaid) = upper(i.dataareaid)
             and invenbl.[IsDelete] is null
-    cross apply stage.f_get_enum_translation('inventtable', '1033') as enumit
-    cross apply stage.f_get_enum_translation('ecoresproduct', '1033') as enum
+    cross apply dbo.f_get_enum_translation('inventtable', '1033') as enumit
+    cross apply dbo.f_get_enum_translation('ecoresproduct', '1033') as enum
 
     /* adding planning product categories against the dim as per commercial finance requirements */
     left join
@@ -196,8 +196,8 @@ with seafood_item_excl as (
     --left join { { s o u r ce('fno', 'dxc_packagingconfigurationtable') }} pck on i.dxc_packagingcode = pck.packagingcode and upper(i.dataareaid) = upper(pck.dataareaid)
     --left join { { r e f ('stg_dim_d365_item_std_cost_1') }} icst on i.itemid = icst.itemid and upper(i.dataareaid)  = upper(icst.item_standardcost_dataareaid)
     */
-    cross apply stage.f_get_enum_translation('inventtable', '1033') as isc
-    cross apply stage.f_get_enum_translation('inventtable', '1033') as aw
+    cross apply dbo.f_get_enum_translation('inventtable', '1033') as isc
+    cross apply dbo.f_get_enum_translation('inventtable', '1033') as aw
 
     left join
         {{ ref('stg_dim_d365_item_allocation') }}

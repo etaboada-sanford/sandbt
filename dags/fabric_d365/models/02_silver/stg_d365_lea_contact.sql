@@ -25,7 +25,7 @@ inner join {{ source('fno', 'logisticslocation') }} as ll
     on pl.location = ll.recid
 inner join {{ source('fno', 'logisticselectronicaddress') }} as lea
     on ll.recid = lea.location
-cross apply stage.f_get_enum_translation('logisticselectronicaddress', '1033') as enum
+cross apply dbo.f_get_enum_translation('logisticselectronicaddress', '1033') as enum
 where {{ translate_enum('enum', 'lea.type' ) }} = 'Email address' and coalesce(lea.locator, '') != ''
     {%- if is_incremental() %}
         and lea.sysrowversion > {{ get_max_sysrowversion() }}

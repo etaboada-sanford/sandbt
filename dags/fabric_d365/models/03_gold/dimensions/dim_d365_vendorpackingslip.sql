@@ -34,7 +34,7 @@ select
     , upper(v.intercompanycompanyid) as intercompanycompanyid
     , coalesce(p.name, po.orderer) as requester
 from {{ source('fno', 'vendpackingslipjour') }} as v
-cross apply stage.f_get_enum_translation('vendpackingslipjour', '1033') as ept
+cross apply dbo.f_get_enum_translation('vendpackingslipjour', '1033') as ept
 left join {{ source('fno', 'hcmworker') }} as w on v.requester = w.recid
 left join {{ ref('dim_d365_party') }} as p on w.person = p.party_recid
 left join {{ ref('dim_d365_purchaseorder') }} as po on upper(v.dataareaid) = po.purchaseorder_dataareaid and v.purchid = po.purchid

@@ -66,7 +66,7 @@ with ctcust as (
     left join {{ source('fno', 'companyinfo') }} as coy on c.dataareaid = coy.dataareaid
     left join {{ source('fno', 'smmbusrelsalesdistrictgroup') }} as sdg on c.salesdistrictid = sdg.salesdistrictid and upper(c.dataareaid) = upper(sdg.dataareaid)
     left join {{ source('fno', 'smmbusrelsegmentgroup') }} as sgm on c.segmentid = sgm.segmentid and upper(c.dataareaid) = upper(sgm.dataareaid)
-    cross apply stage.f_get_enum_translation('custtable', '1033') as custtable_enum
+    cross apply dbo.f_get_enum_translation('custtable', '1033') as custtable_enum
     {%- if is_incremental() %}
         where c.sysrowversion > {{ get_max_sysrowversion() }}
     {% else %}

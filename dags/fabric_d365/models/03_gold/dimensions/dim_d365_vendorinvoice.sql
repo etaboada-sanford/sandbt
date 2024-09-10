@@ -50,7 +50,7 @@ select
     , j.versionnumber
     , j.sysrowversion
 from {{ source('fno', 'vendinvoicejour') }} as j
-cross apply stage.f_get_enum_translation('vendinvoicejour', '1033') as ept
+cross apply dbo.f_get_enum_translation('vendinvoicejour', '1033') as ept
 {%- if is_incremental() %}
     where j.sysrowversion > {{ get_max_sysrowversion() }}
 {% else %}

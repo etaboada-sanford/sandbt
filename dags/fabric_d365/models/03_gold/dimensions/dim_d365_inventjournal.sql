@@ -37,8 +37,8 @@ inner join {{ source('fno', 'inventjournalname') }} as ijn
 left join {{ source('fno', 'dirpersonuser') }} as u on ijt.posteduserid = u.[user]
 left join {{ ref('dim_d365_party') }} as p on u.personparty = p.party_recid
 cross apply dbo.f_convert_utc_to_nzt(ijt.posteddatetime) as ijtposteddatetime
-cross apply stage.f_get_enum_translation('inventjournaltable', '1033') as inventjournaltable_enum
-cross apply stage.f_get_enum_translation('inventjournalname', '1033') as inventjournalname_enum
+cross apply dbo.f_get_enum_translation('inventjournaltable', '1033') as inventjournaltable_enum
+cross apply dbo.f_get_enum_translation('inventjournalname', '1033') as inventjournalname_enum
 {%- if is_incremental() %}
     where ijt.sysrowversion > {{ get_max_sysrowversion() }}
 {%- else %}

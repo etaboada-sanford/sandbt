@@ -96,8 +96,8 @@ with ld as (
     from {{ source('fno', 'whsloadtable') }} as wlt
     left join {{ source('fno', 'inventlocation') }} as w on wlt.inventlocationid = w.inventlocationid and upper(wlt.dataareaid) = upper(w.dataareaid) and w.[IsDelete] is null and wlt.[IsDelete] is null
     left join {{ source('fno', 'inventsite') }} as s on wlt.inventsiteid = s.siteid and upper(wlt.dataareaid) = upper(s.dataareaid) and s.[IsDelete] is null and wlt.[IsDelete] is null
-    cross apply stage.f_get_enum_translation('whsloadtable', '1033') as els
-    cross apply stage.f_get_enum_translation('whsloadtable', '1033') as eld
+    cross apply dbo.f_get_enum_translation('whsloadtable', '1033') as els
+    cross apply dbo.f_get_enum_translation('whsloadtable', '1033') as eld
     left join {{ source('fno', 'whsloadtemplate') }} as wt on wlt.loadtemplateid = wt.loadtemplateid and upper(wlt.dataareaid) = upper(wt.dataareaid) and wt.[IsDelete] is null
     left join {{ source('fno', 'intrastatport') }} as dest on wlt.dxc_destinationlocationcode = dest.portid and dest.[IsDelete] is null
     left join {{ source('fno', 'intrastatport') }} as desp on wlt.dxc_dispatchlocationcode = desp.portid and desp.[IsDelete] is null

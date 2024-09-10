@@ -2,7 +2,7 @@ version: 2
 sources:
 - name: fno
   schema: dbo
-  database: dataverse_sanfordsit_devpremsanpowerplatfstor_unqf87dd056b3bf4075bf970702376af
+  database: "{{ var('source_lakehouse_d365') }}"
   description: D365 FNO shortcuts from Dataverse
   tables:
   - name: GlobalOptionsetMetadata

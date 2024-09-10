@@ -55,7 +55,7 @@ from {{ source('fno', 'vendtable') }} as v
 left join {{ source('fno', 'vw_dirpartytable') }} as p on v.party = p.recid and p.[IsDelete] is null
 left join {{ source('fno', 'logisticslocation') }} as ll on p.primaryaddresslocation = ll.recid
 left join {{ source('fno', 'logisticspostaladdress') }} as lpa on ll.recid = lpa.location and getdate() between lpa.validfrom and lpa.validto
-cross apply stage.f_get_enum_translation('vendtable', '1033') as eb
+cross apply dbo.f_get_enum_translation('vendtable', '1033') as eb
 left join {{ ref('stg_d365_lea_contact_poconfirm') }} as email_po on v.party = email_po.party_recid
 left join {{ ref('stg_d365_lea_contact_invoice') }} as email_invoice on v.party = email_invoice.party_recid
 left join {{ ref('stg_d365_lea_contact_remitto') }} as email_remit on v.party = email_remit.party_recid

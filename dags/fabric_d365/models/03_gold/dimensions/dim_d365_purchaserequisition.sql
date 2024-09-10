@@ -37,9 +37,9 @@ select
 from {{ source('fno', 'purchreqtable') }} as pt
 cross apply dbo.f_convert_utc_to_nzt(pt.submitteddatetime) as sdat
 
-cross apply stage.f_get_enum_translation('purchreqtable', '1033') as eprt
-cross apply stage.f_get_enum_translation('purchreqtable', '1033') as eprp
-cross apply stage.f_get_enum_translation('purchreqtable', '1033') as eprs
+cross apply dbo.f_get_enum_translation('purchreqtable', '1033') as eprt
+cross apply dbo.f_get_enum_translation('purchreqtable', '1033') as eprp
+cross apply dbo.f_get_enum_translation('purchreqtable', '1033') as eprs
 
 left join {{ source('fno', 'companyinfo') }} as co on pt.companyinfodefault = co.recid
 left join {{ source('fno', 'hcmworker') }} as h on pt.originator = h.recid

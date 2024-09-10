@@ -41,8 +41,8 @@ with utcbasedata as (
     from {{ source('fno', 'whsshipmenttable') }} as wst
     left join {{ source('fno', 'inventlocation') }} as w on wst.inventlocationid = w.inventlocationid and upper(wst.dataareaid) = upper(w.dataareaid)
     left join {{ source('fno', 'inventsite') }} as s on wst.inventsiteid = s.siteid and upper(wst.dataareaid) = upper(s.dataareaid)
-    cross apply stage.f_get_enum_translation('whsshipmenttable', '1033') as ess
-    cross apply stage.f_get_enum_translation('whsshipmenttable', '1033') as eld
+    cross apply dbo.f_get_enum_translation('whsshipmenttable', '1033') as ess
+    cross apply dbo.f_get_enum_translation('whsshipmenttable', '1033') as eld
     left join {{ source('fno', 'logisticspostaladdress') }} as ad on wst.deliverypostaladdress = ad.recid and ad.[IsDelete] is null
 
     {%- if is_incremental() %}

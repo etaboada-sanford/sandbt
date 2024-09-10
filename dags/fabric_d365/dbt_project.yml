@@ -11,6 +11,7 @@ vars:
   'dbt_date:time_zone': 'Pacific/Auckland'
   'dim_date_from': '2019-01-01'
   'dim_date_to': '2029-12-31'
+  'source_lakehouse_d365': 'dataverse_sanfordsit_devpremsanpowerplatfstor_unqf87dd056b3bf4075bf970702376af'
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -29,24 +30,24 @@ models:
   d365:
     01_bronze:
     02_silver:
-      +database: dwh_sanford
-      +schema: stage
+      +database: dwh_d365
+      +schema: silver
       +materialized: incremental
       +on_schema_change: "sync_all_columns"
     03_gold:
-      +database: dwh_sanford
-      +schema: dw
+      +database: dwh_d365
+      +schema: gold
       +materialized: incremental
       +on_schema_change: "sync_all_columns"
 
 seeds:
   d365:
     02_silver:
-      +database: dwh_sanford
-      +schema: stage
+      +database: dwh_d365
+      +schema: silver
     03_gold:
-      +database: dwh_sanford
-      +schema: dw
+      +database: dwh_d365
+      +schema: gold
 
 dispatch:
   - macro_namespace: dbt_utils

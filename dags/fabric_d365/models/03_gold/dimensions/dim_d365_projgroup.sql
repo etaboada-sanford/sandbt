@@ -26,7 +26,7 @@ select
     , pr.sysrowversion
 
 from {{ source('fno', 'projgroup') }} as pr
-cross apply stage.f_get_enum_translation('projgroup', '1033') as eprt
+cross apply dbo.f_get_enum_translation('projgroup', '1033') as eprt
 {%- if is_incremental() %}
     where pr.sysrowversion > {{ get_max_sysrowversion() }}
 {%- else %}

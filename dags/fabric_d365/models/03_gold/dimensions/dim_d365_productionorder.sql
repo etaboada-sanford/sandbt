@@ -68,22 +68,22 @@ left join
         and sl.[IsDelete] is null
 
 /* ProdStatus -> ProdStatus */
-cross apply stage.f_get_enum_translation('prodtable', '1033') as eps
+cross apply dbo.f_get_enum_translation('prodtable', '1033') as eps
     on eps.[OptionSetName] = 'prodstatus'
         and pt.prodstatus = eps.[Option]
         and eps.[EntityName] = 'prodtable'
 /* backorderstatus -> ProdBackStatus */
-cross apply stage.f_get_enum_translation('prodtable', '1033') as epbs
+cross apply dbo.f_get_enum_translation('prodtable', '1033') as epbs
     on epbs.[OptionSetName] = 'backorderstatus'
         and pt.backorderstatus = epbs.[Option]
         and epbs.[EntityName] = 'prodtable'
 /* ProdPostingType -> ProdPostingType */
-cross apply stage.f_get_enum_translation('prodtable', '1033') as eppt
+cross apply dbo.f_get_enum_translation('prodtable', '1033') as eppt
     on eppt.[OptionSetName] = 'prodpostingtype'
         and pt.prodpostingtype = eppt.[Option]
         and eppt.[EntityName] = 'prodtable'
 /* InventRefType -> InventRefType */
-cross apply stage.f_get_enum_translation('prodtable', '1033') as eirt
+cross apply dbo.f_get_enum_translation('prodtable', '1033') as eirt
     on eirt.[OptionSetName] = 'inventreftype'
         and pt.inventreftype = eirt.[Option]
         and eirt.[EntityName] = 'prodtable'

@@ -31,7 +31,7 @@ select
     end as chargetype
     , upper(m.dataareaid) as charge_dataareaid
 from {{ source('fno', 'markuptable') }} as m
-cross apply stage.f_get_enum_translation('markuptable', '1033') as markuptable_enum
+cross apply dbo.f_get_enum_translation('markuptable', '1033') as markuptable_enum
 {%- if is_incremental() %}
     where m.sysrowversion > {{ get_max_sysrowversion() }}
 {% else %}

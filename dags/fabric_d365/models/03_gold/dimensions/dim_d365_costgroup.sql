@@ -16,7 +16,7 @@ select
     , cg.sysrowversion
     , upper(cg.dataareaid) as costgroup_dataareaid
 from {{ source('fno', 'bomcostgroup') }} as cg
-cross apply stage.f_get_enum_translation('bomcostgroup', '1033') as bomcostgroup_enum
+cross apply dbo.f_get_enum_translation('bomcostgroup', '1033') as bomcostgroup_enum
 {%- if is_incremental() %}
     where cg.sysrowversion > {{ get_max_sysrowversion() }}
 {% else %}
